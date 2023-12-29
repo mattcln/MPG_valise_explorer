@@ -9,6 +9,7 @@ A Python script for scraping data from the MPG (Mon Petit Gazon) website.
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
+- [Database Architecture](#database-architecure)
 - [License](#license)
 
 ## Introduction
@@ -59,6 +60,12 @@ python scraper.py
 ```
 
 This will authenticate your account on MPG and retrieve data from the specified league.
+
+## Database Architecture
+
+Here is the database architecture for the MPG Football Scraper:
+
+![Database Architecture](MPG_SQL_Tables.png)
 
 ## License
 
