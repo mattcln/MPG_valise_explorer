@@ -15,6 +15,11 @@ password = config["credentials"]["password"]
 url = "https://mpg.football/auth/login"
 
 def get_session_auth(session):
+    """
+    This function authentificates the session using username and password from the config.json.
+
+    :param session: Requests session
+    """
     response = session.get(url, auth=HTTPBasicAuth(username, password))
     if response.status_code == 200:
         print("Authentication successful!")
