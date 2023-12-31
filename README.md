@@ -41,15 +41,11 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Before running the script, update the `config.ini` file with your MPG credentials:
+Before running the script, update the `config/config_example.json` file with your MPG credentials:
 
-```text
-[credentials]
-username = your_username
-password = your_password
-```
+Then rename it `config.json`.
 
-Make sure to keep your credentials secure and do not share them publicly.
+Make sure to keep your credentials secure and do not share them publicly, even if it already takes me enough time to make my teams so I won't go and make yours if I get your credentials...
 
 ## Usage
 
