@@ -2,14 +2,16 @@ import requests
 from requests.auth import HTTPBasicAuth
 from bs4 import BeautifulSoup
 import re
+from config.config_reader import get_config
+
+config = get_config()
 
 # Define your credentials
-username = "matthieu.cln@gmail.com"
-password = "xxxx"
+username = config["credentials"]["username"]
+password = config["credentials"]["password"]
 
-# URL of the httpbin endpoint that requires Basic Authentication
+# URL of the MPG login page
 url = "https://mpg.football/auth/login"
-
 
 def get_session_auth(session):
     response = session.get(url, auth=HTTPBasicAuth(username, password))

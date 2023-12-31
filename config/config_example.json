@@ -1,0 +1,8 @@
+{
+    "_comment": "Update this config file with your credentials, and rename it 'config.json' !",
+    "credentials": {
+        "username": "your_username",
+        "password": "your_password"
+    },
+    "api_key": "votre_cle_api"
+}
