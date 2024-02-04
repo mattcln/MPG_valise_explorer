@@ -1,12 +1,14 @@
-from selenium import webdriver
+import logging
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
-import time
+
+from utils.selenium import get_url
 
 
 class Driver:
@@ -27,24 +29,39 @@ class Driver:
 
     def accept_cookies(self):
         """_summary_
-
-        :param driver: _description_
+        Accept cookies to be able to put our logging credentials
+        1- Looking for every iframes, as cookies accept button is on an iframe.
+        2- Try to click on this button for every iframe.
+        3- Raising an error if cookies weren't accepted
         """
         iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+        accepted = False
         for iframe in iframes:
             try:
                 self.driver.switch_to.frame(iframe)
                 button_XPATH = "//button[@class='sc-furwcr jhwOCG button button--filled button__acceptAll']"
-                WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, button_XPATH))
-                ).click()
-                print("BINGO COOKIES")
+                WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_XPATH))).click()
+                accepted = True
+                logging.info("BINGO COOKIES ACCEPTED.")
                 break
             except:
-                print("Element not found")
+                logging.info("Cookies not found in this iframe.")
+        if not accepted:
+            raise NameError("The button to accept cookies was not found.")
 
     def logging(self, user, password):
-        self.driver.get(self.url)
+        """
+        Logging user.
+        1- Getting base URL
+        2- Going fullscreen
+        3- Accepting cookies
+        4- Sending user & password keys
+        5- Clicking connect button
+
+        :param user: User mail
+        :param password: User password
+        """
+        get_url(driver=self.driver, url=self.url)
         self.driver.fullscreen_window()
 
         self.accept_cookies()
@@ -57,7 +74,4 @@ class Driver:
         buttons = self.driver.find_elements(By.TAG_NAME, "button")
         for button in buttons:
             if button.text == "Je me connecte":
-                print("FOUND IT")
                 button.click()
-
-        time.sleep(100)
