@@ -6,6 +6,10 @@ from utils.selenium import get_url
 
 
 class Game:
+    tab_info_class = "sc-bcXHqe euGzhE"
+    right_modules_class = "sc-bcXHqe sc-dmctIk grPqgW jgCKGU"
+    bonus_element_class = "sc-bcXHqe fuCkSG"
+
     def get_score_tab_info(self):
         """_summary_
         Taking all infos in the score table of a game
@@ -13,7 +17,7 @@ class Game:
         2- Taking all "p" tag elements
         3- Returning a dictionnary with all informations - TODO: Order might change. This approach is not robust.
         """
-        tableau_scores = self.driver.find_element(By.XPATH, "//*[@class='sc-bcXHqe euGzhE']")
+        tableau_scores = self.driver.find_element(By.XPATH, f"//*[@class='{self.tab_info_class}']")
         text_lists = []
         for p in tableau_scores.find_elements(By.TAG_NAME, "p"):
             text_lists.append(p.text)
@@ -37,12 +41,12 @@ class Game:
 
         TODO: J'arrive à récupérer tout les bonus mais je ne sais pas comment faire pour savoir quel équipe en a profité.
         """
-        right_modules = self.driver.find_elements(By.XPATH, "//*[@class='sc-bcXHqe sc-dmctIk grPqgW jgCKGU']")
+        right_modules = self.driver.find_elements(By.XPATH, f"//*[@class='{self.right_modules_class}']")
         if len(right_modules) != 3:
             raise AttributeError(
                 f"Waiting to find 3 right modules. Found {len(right_modules)}. Have the right modules display changed ?"
             )
-        bonus_elements = right_modules[1].find_elements(By.XPATH, "//*[@class='sc-bcXHqe fuCkSG']")
+        bonus_elements = right_modules[1].find_elements(By.XPATH, f"//*[@class='{self.bonus_element_class}']")
         logging.info(f"Found {len(bonus_elements)} bonus.")
         for bonus in bonus_elements:
             for p in bonus.find_elements(By.TAG_NAME, "p"):

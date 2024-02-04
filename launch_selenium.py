@@ -21,7 +21,7 @@ Driver.logging(user, password)
 
 game = Game(
     driver=Driver.driver,
-    game_link="https://mpg.football/mpg-match/league/mpg_division_KWGFGJUM_1_1/mpg_division_match_KWGFGJUM_1_1_3_5_8_7",
+    game_link="https://mpg.football/mpg-match/league/mpg_division_KWGFGJUM_1_1/mpg_division_match_KWGFGJUM_1_1_3_5_8_7",  # https://mpg.football/mpg-match/league/mpg_division_KWGFGJUM_1_1/mpg_division_match_KWGFGJUM_1_1_15_4_4_3
 )
 time.sleep(10)
 stop
