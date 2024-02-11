@@ -23,11 +23,23 @@ class Game:
     mpg_goals_color = "#45C945"
     save_goals_color = "#EF1728"
 
-    def create_id(self):
+    def create_game_id(self):
         """_summary_
         Create a unique id for each game
         """
         return f"{self.league_id}_{self.season_number}_{self.tab_info['h_team']}_{self.tab_info['v_team']}"
+
+    def get_team_id(self, home: bool):
+        """_summary_
+        Get unique id for each team
+        :param home: Is the team home or visitor ?
+        :return: _description_
+        """
+        if home:
+            team = "h_team"
+        else:
+            team = "v_team"
+        return f"{self.league_id}_{self.season_number}_{self.tab_info[team]}"
 
     def get_players_info_df(self, scores_tab_element):
         """_summary_
@@ -89,16 +101,14 @@ class Game:
         for p in tableau_scores.find_elements(By.TAG_NAME, "p"):
             text_lists.append(p.text)
 
-        print(df_h_players_info)
-        print(df_v_players_info)
         tab_info = {}
         teams = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg sc-hbqYmb gappF ePpVLH']")
-        tab_info["h_team"] = teams[0].text
-        tab_info["v_team"] = teams[1].text
+        tab_info["h_team"] = teams[0].text.replace(" ", "_")
+        tab_info["v_team"] = teams[1].text.replace(" ", "_")
 
         players = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg dciwac']")
-        tab_info["h_player"] = players[0].text
-        tab_info["v_player"] = players[3].text
+        tab_info["h_player"] = players[0].text.replace(" ", "_")
+        tab_info["v_player"] = players[3].text.replace(" ", "_")
 
         score = tableau_scores.find_element(By.XPATH, f"//*[@class='sc-dkrFOg sc-jTjUTQ dfVVDa ibfwxi']").text
         tab_info["h_score"] = int(score.split(" ")[0])
@@ -112,9 +122,6 @@ class Game:
 
         tab_info["h_own_goals"] = df_h_players_info.select(pl.sum("own_goals"))[0, 0]
         tab_info["v_own_goals"] = df_v_players_info.select(pl.sum("own_goals"))[0, 0]
-
-        print(tab_info)
-        stop
 
         return tab_info
 
@@ -157,20 +164,44 @@ class Game:
         v_red_cards (int)
         gameseason_nb (int)
         """
-        pass
+        df = pl.DataFrame(
+            {
+                "match_id": self.game_id,
+                "h_teamid": self.game_id,
+                "v_teamid": self.game_id,
+                "h_total_goals": self.game_id,
+                "h_mpg_goals": self.game_id,
+                "h_real_goals": self.game_id,
+                "h_own_goals": self.game_id,
+                "h_red_cards": self.game_id,
+                "v_total_goals": self.game_id,
+                "v_mpg_goals": self.game_id,
+                "v_real_goals": self.game_id,
+                "v_own_goals": self.game_id,
+                "v_red_cards": self.game_id,
+                "gameseason_nb": self.game_season_number,
+            }
+        )
+        return df
 
     def __init__(
         self,
         driver,
         league_id: str,
         season_number: int,
+        game_season_number: int,
         game_link: str,
     ):
         self.driver = driver
         self.game_link = game_link
         self.league_id = league_id
         self.season_number = season_number
+        self.game_season_number = game_season_number
+
         get_url(driver=self.driver, url=game_link)
         self.tab_info = self.get_score_tab_info()
-        self.game_id = self.create_id()
-        self.get_bonus_info()
+        self.game_id = self.create_game_id()
+        self.h_team_id = self.get_team_id(home=True)
+        self.v_team_id = self.get_team_id(home=False)
+        print(self.db_insert())
+        # self.get_bonus_info()
