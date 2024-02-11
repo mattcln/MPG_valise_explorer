@@ -1,7 +1,7 @@
 import logging
 import time
 
-import pandas as pd
+import polars as pl
 from selenium.webdriver.common.by import By
 
 from utils.selenium import get_url
@@ -10,10 +10,10 @@ from utils.selenium import get_url
 class Game:
     tab_info_class = "sc-bcXHqe euGzhE"
     tab_info_class = "sc-bcXHqe sc-dmctIk gmwvWu jMJMOc"  ### Permet d'avoir toutes les infos dans le panneau (dont le numéro de la journée et les buteurs)
-    home_goals_class = "sc-bcXHqe fNHVxg"
-    home_scorers_class = "sc-bcXHqe gnMozL"
-    away_goals_class = "sc-bcXHqe gFNZhX"
-    away_scorers_class = "sc-bcXHqe bIJtk"
+    h_goals_class = "sc-bcXHqe fNHVxg"
+    h_scorers_class = "sc-bcXHqe gnMozL"
+    v_goals_class = "sc-bcXHqe gFNZhX"
+    v_scorers_class = "sc-bcXHqe bIJtk"
     right_modules_class = "sc-bcXHqe sc-dmctIk grPqgW jgCKGU"
     bonus_element_class = "sc-bcXHqe fuCkSG"
 
@@ -27,7 +27,7 @@ class Game:
         """_summary_
         Create a unique id for each game
         """
-        return f"{self.league_id}_{self.season_number}_{self.tab_info['home_team']}_{self.tab_info['away_team']}"
+        return f"{self.league_id}_{self.season_number}_{self.tab_info['h_team']}_{self.tab_info['v_team']}"
 
     def get_players_info_df(self, scores_tab_element):
         """_summary_
@@ -51,27 +51,29 @@ class Game:
         both goal scorers etc. I didn't find a way to catch only the first tab easily, but should be doable
 
         :param scores_tab_element: Scores tab selenium element
-        :param home_player: are we looking for the home or away player ?
         """
         players_info = []
-        for team in ["home", "away"]:
+        for team in ["home", "visitor"]:
             if team == "home":
-                goals_class = self.home_goals_class
-                scorers_class = self.home_scorers_class
+                goals_class = self.h_goals_class
+                scorers_class = self.h_scorers_class
             else:
-                goals_class = self.away_goals_class
-                scorers_class = self.away_scorers_class
+                goals_class = self.v_goals_class
+                scorers_class = self.v_scorers_class
 
             for scorer in scores_tab_element.find_elements(
                 By.XPATH, f"//*[@class='sc-bcXHqe drrRfn'][1]//*[@class='{goals_class}']//*[@class='{scorers_class}']"
             ):
                 scorer_infos = {}
                 scorer_infos["name"] = scorer.find_elements(By.TAG_NAME, "p")[1].text
-                scorer_infos["nb_goals"] = len(scorer.find_elements(By.TAG_NAME, "svg"))
+                scorer_infos["real_goals"] = len(scorer.find_elements(By.TAG_NAME, "svg"))
                 scorer_infos["team"] = team
-                print(f"Appending : {scorer_infos}")
                 players_info.append(scorer_infos)
-        return pd.DataFrame(players_info)
+
+        df_players_info = pl.DataFrame(players_info, schema=["name", "real_goals", "mpg_goals", "own_goals", "team"])
+        # Fill null, might be a better way to do that
+        df_players_info = df_players_info.with_columns(pl.col("real_goals", "mpg_goals", "own_goals").fill_null(0))
+        return df_players_info.filter(pl.col("team") == "home"), df_players_info.filter(pl.col("team") == "visitor")
 
     def get_score_tab_info(self):
         """_summary_
@@ -81,24 +83,38 @@ class Game:
         3- Returning a dictionnary with all informations - TODO: Order might change. This approach is not robust.
         """
         tableau_scores = self.driver.find_element(By.XPATH, f"//*[@class='{self.tab_info_class}']")
-        players_info = self.get_players_info_df(tableau_scores)
+        df_h_players_info, df_v_players_info = self.get_players_info_df(tableau_scores)
+
         text_lists = []
         for p in tableau_scores.find_elements(By.TAG_NAME, "p"):
             text_lists.append(p.text)
 
-        print(players_info)
+        print(df_h_players_info)
+        print(df_v_players_info)
         tab_info = {}
         teams = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg sc-hbqYmb gappF ePpVLH']")
-        tab_info["home_team"] = teams[0].text
-        tab_info["ext_team"] = teams[1].text
+        tab_info["h_team"] = teams[0].text
+        tab_info["v_team"] = teams[1].text
 
         players = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg dciwac']")
-        tab_info["home_player"] = players[0].text
-        tab_info["ext_player"] = players[3].text
+        tab_info["h_player"] = players[0].text
+        tab_info["v_player"] = players[3].text
 
         score = tableau_scores.find_element(By.XPATH, f"//*[@class='sc-dkrFOg sc-jTjUTQ dfVVDa ibfwxi']").text
-        tab_info["home_score"] = int(score.split(" ")[0])
-        tab_info["ext_score"] = int(score.split(" ")[2])
+        tab_info["h_score"] = int(score.split(" ")[0])
+        tab_info["v_score"] = int(score.split(" ")[2])
+
+        tab_info["h_real_goals"] = df_h_players_info.select(pl.sum("real_goals"))[0, 0]
+        tab_info["v_real_goals"] = df_v_players_info.select(pl.sum("real_goals"))[0, 0]
+
+        tab_info["h_mpg_goals"] = df_h_players_info.select(pl.sum("mpg_goals"))[0, 0]
+        tab_info["v_mpg_goals"] = df_v_players_info.select(pl.sum("mpg_goals"))[0, 0]
+
+        tab_info["h_own_goals"] = df_h_players_info.select(pl.sum("own_goals"))[0, 0]
+        tab_info["v_own_goals"] = df_v_players_info.select(pl.sum("own_goals"))[0, 0]
+
+        print(tab_info)
+        stop
 
         return tab_info
 
