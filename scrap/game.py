@@ -1,4 +1,5 @@
 import logging
+import time
 
 import pandas as pd
 from selenium.webdriver.common.by import By
@@ -22,6 +23,12 @@ class Game:
     mpg_goals_color = "#45C945"
     save_goals_color = "#EF1728"
 
+    def create_id(self):
+        """_summary_
+        Create a unique id for each game
+        """
+        return f"{self.league_id}_{self.season_number}_{self.tab_info['home_team']}_{self.tab_info['away_team']}"
+
     def get_players_info_df(self, scores_tab_element):
         """_summary_
         Receiving the game scores tab element, this function retrieves all players informations displayed there as a pd df.
@@ -30,6 +37,7 @@ class Game:
         3- For each of scorer, we get both "p" elements:
             As of 10/02/2024, there are two elements, one looks always empty but might be kept for particularly long names
             We read them both and join them.
+            JUST FOUND OUT : it's the minutes of the goals, in case it's a real game and not mpg game
         4- We count the number of 'svg' elemnts = number of things displayed close to his names
         TODO: Find a way to classify those elements (real goals, mpg goals, goals saved etc.), in an other function ?
             For that, I recommend using 'print(scorer.get_attribute("innerHTML"))' and checking in an other window
@@ -38,6 +46,9 @@ class Game:
         Infos are saved as a list of dicts with one element per players in the scores tab element, structured as :
         {name:,nb_goals:,team:}
         Then, returned in a pandas dataframe
+
+        Notes : not working for real games because of the "Dernières confrontation" at the end of the page. We retrieved both tabs
+        both goal scorers etc. I didn't find a way to catch only the first tab easily, but should be doable
 
         :param scores_tab_element: Scores tab selenium element
         :param home_player: are we looking for the home or away player ?
@@ -51,17 +62,14 @@ class Game:
                 goals_class = self.away_goals_class
                 scorers_class = self.away_scorers_class
 
-            team_goals_element = scores_tab_element.find_element(By.XPATH, f"//*[@class='{goals_class}']")
-
-            for scorer in team_goals_element.find_elements(By.XPATH, f"//*[@class='{scorers_class}']"):
+            for scorer in scores_tab_element.find_elements(
+                By.XPATH, f"//*[@class='sc-bcXHqe drrRfn'][1]//*[@class='{goals_class}']//*[@class='{scorers_class}']"
+            ):
                 scorer_infos = {}
-                scorer_names_element = scorer.find_elements(By.TAG_NAME, "p")
-                all_scorer_names = []
-                for scorer_name in scorer_names_element:
-                    all_scorer_names.append(scorer_name.text)
-                scorer_infos["name"] = " ".join(all_scorer_names).strip()
+                scorer_infos["name"] = scorer.find_elements(By.TAG_NAME, "p")[1].text
                 scorer_infos["nb_goals"] = len(scorer.find_elements(By.TAG_NAME, "svg"))
                 scorer_infos["team"] = team
+                print(f"Appending : {scorer_infos}")
                 players_info.append(scorer_infos)
         return pd.DataFrame(players_info)
 
@@ -78,17 +86,19 @@ class Game:
         for p in tableau_scores.find_elements(By.TAG_NAME, "p"):
             text_lists.append(p.text)
 
-        print(text_lists)
-        stop
+        print(players_info)
         tab_info = {}
-        tab_info["home_team"] = text_lists[0]
-        tab_info["home_player"] = text_lists[1]
-        tab_info["home_score"] = int(text_lists[4].split(" ")[0])
-        tab_info["ext_team"] = text_lists[6]
-        tab_info["ext_player"] = text_lists[7]
-        tab_info["ext_score"] = int(text_lists[4].split(" ")[2])
+        teams = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg sc-hbqYmb gappF ePpVLH']")
+        tab_info["home_team"] = teams[0].text
+        tab_info["ext_team"] = teams[1].text
 
-        logging.info(f"Informations found in score tab : '{tab_info}'.")
+        players = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg dciwac']")
+        tab_info["home_player"] = players[0].text
+        tab_info["ext_player"] = players[3].text
+
+        score = tableau_scores.find_element(By.XPATH, f"//*[@class='sc-dkrFOg sc-jTjUTQ dfVVDa ibfwxi']").text
+        tab_info["home_score"] = int(score.split(" ")[0])
+        tab_info["ext_score"] = int(score.split(" ")[2])
 
         return tab_info
 
@@ -110,10 +120,11 @@ class Game:
             for p in bonus.find_elements(By.TAG_NAME, "p"):
                 print(p.text)
 
-    def sql_insert(self):
+    def db_insert(self):
         """_summary_
-        Inserting retrieved informations in the game sql db.
+        Saving game informations in file.
 
+        TODO: Append a parquet file for each game (parquet is good for duckdb)
         The SQL Schema is planned as :
         match_id (PK)
         h_teamid (FK)
@@ -135,10 +146,15 @@ class Game:
     def __init__(
         self,
         driver,
+        league_id: str,
+        season_number: int,
         game_link: str,
     ):
         self.driver = driver
         self.game_link = game_link
+        self.league_id = league_id
+        self.season_number = season_number
         get_url(driver=self.driver, url=game_link)
         self.tab_info = self.get_score_tab_info()
+        self.game_id = self.create_id()
         self.get_bonus_info()
