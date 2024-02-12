@@ -17,6 +17,8 @@ class Game:
     right_modules_class = "sc-bcXHqe sc-dmctIk grPqgW jgCKGU"
     bonus_element_class = "sc-bcXHqe fuCkSG"
 
+    export_file_path = "export/games.parquet"
+
     # Unused
     goals_class = "sc-bcXHqe crTPxA"
     real_goals_color = "#696773"
@@ -167,41 +169,59 @@ class Game:
         df = pl.DataFrame(
             {
                 "match_id": self.game_id,
-                "h_teamid": self.game_id,
-                "v_teamid": self.game_id,
-                "h_total_goals": self.game_id,
-                "h_mpg_goals": self.game_id,
-                "h_real_goals": self.game_id,
-                "h_own_goals": self.game_id,
-                "h_red_cards": self.game_id,
-                "v_total_goals": self.game_id,
-                "v_mpg_goals": self.game_id,
-                "v_real_goals": self.game_id,
-                "v_own_goals": self.game_id,
-                "v_red_cards": self.game_id,
-                "gameseason_nb": self.game_season_number,
+                "h_teamid": self.h_team_id,
+                "v_teamid": self.v_team_id,
+                "h_total_goals": self.h_total_goals,
+                "h_mpg_goals": self.h_mpg_goals,
+                "h_real_goals": self.h_real_goals,
+                "h_own_goals": self.h_own_goals,
+                "h_red_cards": self.h_red_cards,
+                "v_total_goals": self.v_total_goals,
+                "v_mpg_goals": self.v_mpg_goals,
+                "v_real_goals": self.v_real_goals,
+                "v_own_goals": self.v_own_goals,
+                "v_red_cards": self.v_red_cards,
+                "game_season_nb": self.game_season_nb,
             }
         )
-        return df
+        try:
+            historical_df = pl.read_parquet(self.export_file_path)
+            df = historical_df.vstack(df)
+        except FileNotFoundError:
+            print("No history file found.")
+        df.write_parquet(self.export_file_path)
+        print(df)
+        print("BONK")
 
     def __init__(
         self,
         driver,
         league_id: str,
         season_number: int,
-        game_season_number: int,
+        game_season_nb: int,
         game_link: str,
     ):
         self.driver = driver
         self.game_link = game_link
         self.league_id = league_id
         self.season_number = season_number
-        self.game_season_number = game_season_number
+        self.game_season_nb = game_season_nb
 
         get_url(driver=self.driver, url=game_link)
         self.tab_info = self.get_score_tab_info()
+
         self.game_id = self.create_game_id()
         self.h_team_id = self.get_team_id(home=True)
         self.v_team_id = self.get_team_id(home=False)
-        print(self.db_insert())
+        self.h_total_goals = self.tab_info["h_mpg_goals"] + self.tab_info["h_real_goals"]
+        self.h_mpg_goals = self.tab_info["h_mpg_goals"]
+        self.h_real_goals = self.tab_info["h_real_goals"]
+        self.h_own_goals = 0
+        self.h_red_cards = 0
+        self.v_total_goals = self.tab_info["v_mpg_goals"] + self.tab_info["v_real_goals"]
+        self.v_mpg_goals = self.tab_info["v_mpg_goals"]
+        self.v_real_goals = self.tab_info["v_real_goals"]
+        self.v_own_goals = 0
+        self.v_red_cards = 0
+        self.db_insert()
         # self.get_bonus_info()
