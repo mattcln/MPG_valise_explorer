@@ -22,6 +22,7 @@ Driver.logging(user, password)
 games_example = [
     "https://mpg.football/mpg-match/league/mpg_division_KWGFGJUM_1_1/mpg_division_match_KWGFGJUM_1_1_3_5_8_7",
     "https://mpg.football/mpg-match/league/mpg_division_KWGFGJUM_1_1/mpg_division_match_KWGFGJUM_1_1_5_1_0_7",  ### Avec bonus !!!
+    "https://mpg.football/mpg-match/league/mpg_division_KWGFGJUM_1_1/mpg_division_match_KWGFGJUM_1_1_8_3_7_4",
     "https://mpg.football/championship-match/mpg_championship_match_2376969",
 ]
 

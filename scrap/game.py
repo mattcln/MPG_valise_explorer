@@ -17,7 +17,8 @@ class Game:
     right_modules_class = "sc-bcXHqe sc-dmctIk grPqgW jgCKGU"
     bonus_element_class = "sc-bcXHqe fuCkSG"
 
-    export_file_path = "export/games.parquet"
+    export_game_path = "export/games.parquet"
+    export_bonus_path = "export/bonus.parquet"
 
     # Unused
     goals_class = "sc-bcXHqe crTPxA"
@@ -145,7 +146,7 @@ class Game:
             for p in bonus.find_elements(By.TAG_NAME, "p"):
                 print(p.text)
 
-    def db_insert(self):
+    def db_game_insert(self):
         """_summary_
         Saving game informations in file.
 
@@ -185,13 +186,65 @@ class Game:
             }
         )
         try:
-            historical_df = pl.read_parquet(self.export_file_path)
+            historical_df = pl.read_parquet(self.export_game_path)
             df = historical_df.vstack(df)
         except FileNotFoundError:
             print("No history file found.")
-        df.write_parquet(self.export_file_path)
+        df.write_parquet(self.export_game_path)
         print(df)
-        print("BONK")
+
+    def db_bonus_insert(self):
+        """_summary_
+        Saving bonus informations in file.
+
+        TODO: Append a parquet file for each game (parquet is good for duckdb)
+        The SQL Schema is planned as :
+        match_id (FK)
+        h_valise (bool)
+        h_ubereats (bool)
+        h_suarez (bool)
+        h_zahia (bool)
+        h_miroir (bool)
+        h_chapron (bool)
+        h_tonton (bool)
+        h_decat (bool)
+        v_valise (bool)
+        v_ubereats (bool)
+        v_suarez (bool)
+        v_zahia (bool)
+        v_miroir (bool)
+        v_chapron (bool)
+        v_tonton (bool)
+        v_decat (bool)
+        """
+        df = pl.DataFrame(
+            {
+                "match_id": self.game_id,
+                "h_valise": self.bonus["h_valise"],
+                "h_ubereats": self.bonus["h_ubereats"],
+                "h_suarez": self.bonus["h_suarez"],
+                "h_zahia": self.bonus["h_zahia"],
+                "h_miroir": self.bonus["h_miroir"],
+                "h_chapron": self.bonus["h_chapron"],
+                "h_tonton": self.bonus["h_tonton"],
+                "h_decat": self.bonus["h_decat"],
+                "v_valise": self.bonus["v_valise"],
+                "v_ubereats": self.bonus["v_ubereats"],
+                "v_suarez": self.bonus["v_suarez"],
+                "v_zahia": self.bonus["v_zahia"],
+                "v_miroir": self.bonus["v_miroir"],
+                "v_chapron": self.bonus["v_chapron"],
+                "v_tonton": self.bonus["v_tonton"],
+                "v_decat": self.bonus["v_decat"],
+            }
+        )
+        try:
+            historical_df = pl.read_parquet(self.export_bonus_path)
+            df = historical_df.vstack(df)
+        except FileNotFoundError:
+            print("No history file found.")
+        df.write_parquet(self.export_bonus_path)
+        print(df)
 
     def __init__(
         self,
@@ -208,6 +261,8 @@ class Game:
         self.game_season_nb = game_season_nb
 
         get_url(driver=self.driver, url=game_link)
+        self.get_bonus_info()
+        stop
         self.tab_info = self.get_score_tab_info()
 
         self.game_id = self.create_game_id()
@@ -224,4 +279,3 @@ class Game:
         self.v_own_goals = 0
         self.v_red_cards = 0
         self.db_insert()
-        # self.get_bonus_info()
