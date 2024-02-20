@@ -30,7 +30,9 @@ class Game:
         """_summary_
         Create a unique id for each game
         """
-        return f"{self.league_id}_{self.season_number}_{self.tab_info['h_team']}_{self.tab_info['v_team']}"
+        h_team_reduced = self.tab_info["h_team"][:4].strip()
+        v_team_reduced = self.tab_info["v_team"][:4].strip()
+        return f"{self.league_id}_{self.season_number}_{self.division}_{h_team_reduced}_{v_team_reduced}"
 
     def get_team_id(self, home: bool):
         """_summary_
@@ -251,18 +253,29 @@ class Game:
         driver,
         league_id: str,
         season_number: int,
+        division: int,
         game_season_nb: int,
         game_link: str,
     ):
+        """_summary_
+
+        :param driver: Selenium driver
+        :param league_id: MPG league unique ID (eg: 'KWGFGJUM')
+        :param season_number: Season number
+        :param division: Division
+        :param game_season_nb: How many matches has it been th
+        is season?
+        :param game_link: mpg full link
+        """
         self.driver = driver
         self.game_link = game_link
         self.league_id = league_id
         self.season_number = season_number
+        self.division = division
         self.game_season_nb = game_season_nb
 
         get_url(driver=self.driver, url=game_link)
-        self.get_bonus_info()
-        stop
+        # self.get_bonus_info()
         self.tab_info = self.get_score_tab_info()
 
         self.game_id = self.create_game_id()
