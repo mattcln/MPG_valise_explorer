@@ -2,12 +2,15 @@ import logging
 import time
 
 import polars as pl
+
+pl.Config(tbl_cols=22)
 from selenium.webdriver.common.by import By
 
 from utils.selenium import get_url
 
 
 class Game:
+    # Tab info
     tab_info_class = "sc-bcXHqe euGzhE"
     tab_info_class = "sc-bcXHqe sc-dmctIk gmwvWu jMJMOc"  ### Permet d'avoir toutes les infos dans le panneau (dont le numéro de la journée et les buteurs)
     h_goals_class = "sc-bcXHqe fNHVxg"
@@ -15,8 +18,21 @@ class Game:
     v_goals_class = "sc-bcXHqe gFNZhX"
     v_scorers_class = "sc-bcXHqe bIJtk"
 
+    # Bonus
     h_bonus_class = "sc-bcXHqe fhMvyb"
     v_bonus_class = "sc-bcXHqe jSNkIw"
+    all_bonus_list = [
+        "valise",
+        "ubereats",
+        "suarez",
+        "zahia",
+        "miroir",
+        "chapron",
+        "tonton",
+        "decat",
+        "5 défenseurs",
+        "4 défenseurs",
+    ]
 
     export_game_path = "export/games.parquet"
     export_bonus_path = "export/bonus.parquet"
@@ -131,29 +147,48 @@ class Game:
 
         return tab_info
 
+    def extract_bonus_from_class(self, bonus_class: str, bonus_dict: dict, home: bool):
+        """
+        Extracting all tag from a given class and incrementing the dictionnary if this bonus is known
+        If bonus is unknown, raising an error.
+
+        Returns bonus dictionnary updated with team bonuses.
+
+        :param bonus_class: Lowest bonus class level => Giving the name of the bonus directly
+        :param bonus_class: Dictionary to update if bonuses are found
+        :param home: Is the team home or visitor ?
+        """
+        if home:
+            prefix = "h_"
+        else:
+            prefix = "v_"
+
+        all_bonus = self.driver.find_elements(By.XPATH, f"//*[@class='{bonus_class}']")
+        for bonus in all_bonus:
+            bonus_name = bonus.find_element(By.TAG_NAME, "p").text.lower()
+            if bonus_name in self.all_bonus_list:
+                bonus_dict[f"{prefix}{bonus_name.replace(' ', '')}"] += 1
+            else:
+                raise ValueError(f"Found an unknown bonus name : {bonus_name}")
+        return bonus_dict
+
     def get_bonus_info(self):
         """_summary_
         The bonus section has the same class as the "Replacements" and "Badges obtained" modules.
         The aim is to retrieve these three elements, then select the second, which should be the bonuses.
 
-        1-On récupère tout les éléments avec le "bonus_element_class" qui correspond à une brique d'une équipe
-        2-Ces élements prennent autant les briques de "Bonus posés" que de "Badges optenus"
-            => On garde seulement les deux premiers (Bonus h team et bonus v team)
-        3- sc-bcXHqe fhMvyb => H | sc-bcXHqe jSNkIw => V
+        1-On créé un dict par défaut avec tout les bonus des deux équipes à 0
+        2-On parcours tout les élements
+
         """
-        h_bonus = self.driver.find_elements(By.XPATH, f"//*[@class='{self.h_bonus_class}']")
-        h_bonus_list = []
-        for bonus in h_bonus:
-            h_bonus_list.append(bonus.find_element(By.TAG_NAME, "p").text)
+        bonus_dict = {}
+        for t in ["h", "v"]:
+            for bonus in self.all_bonus_list:
+                bonus_dict[f"{t}_{bonus.replace(' ', '')}"] = 0
 
-        v_bonus = self.driver.find_elements(By.XPATH, f"//*[@class='{self.v_bonus_class}']")
-        v_bonus_list = []
-        for bonus in v_bonus:
-            v_bonus_list.append(bonus.find_element(By.TAG_NAME, "p").text)
-
-        print(f"H bonus : {h_bonus_list}")
-        print(f"V bonus : {v_bonus_list}")
-        stop
+        bonus_dict = self.extract_bonus_from_class(bonus_class=self.h_bonus_class, bonus_dict=bonus_dict, home=True)
+        bonus_dict = self.extract_bonus_from_class(bonus_class=self.v_bonus_class, bonus_dict=bonus_dict, home=False)
+        return bonus_dict
 
     def db_game_insert(self):
         """_summary_
@@ -237,6 +272,8 @@ class Game:
                 "h_chapron": self.bonus["h_chapron"],
                 "h_tonton": self.bonus["h_tonton"],
                 "h_decat": self.bonus["h_decat"],
+                "h_5défenseurs": self.bonus["h_5défenseurs"],
+                "h_4défenseurs": self.bonus["h_4défenseurs"],
                 "v_valise": self.bonus["v_valise"],
                 "v_ubereats": self.bonus["v_ubereats"],
                 "v_suarez": self.bonus["v_suarez"],
@@ -245,6 +282,8 @@ class Game:
                 "v_chapron": self.bonus["v_chapron"],
                 "v_tonton": self.bonus["v_tonton"],
                 "v_decat": self.bonus["v_decat"],
+                "v_5défenseurs": self.bonus["v_5défenseurs"],
+                "v_4défenseurs": self.bonus["v_4défenseurs"],
             }
         )
         try:
@@ -264,7 +303,9 @@ class Game:
         game_season_nb: int,
         game_link: str,
     ):
-        """_summary_
+        """
+
+        TODO: Add a check on game id, if game is already in base, stop processing.
 
         :param driver: Selenium driver
         :param league_id: MPG league unique ID (eg: 'KWGFGJUM')
@@ -282,7 +323,7 @@ class Game:
         self.game_season_nb = game_season_nb
 
         get_url(driver=self.driver, url=game_link)
-        self.get_bonus_info()
+
         self.tab_info = self.get_score_tab_info()
 
         self.game_id = self.create_game_id()
@@ -299,3 +340,6 @@ class Game:
         self.v_own_goals = 0
         self.v_red_cards = 0
         self.db_game_insert()
+
+        self.bonus = self.get_bonus_info()
+        self.db_bonus_insert()
