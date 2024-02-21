@@ -26,6 +26,8 @@ games_example = [
     "https://mpg.football/championship-match/mpg_championship_match_2376969",
 ]
 
-game = Game(driver=Driver.driver, league_id="KWGFGJUM", season_number=1, game_link=games_example[1], game_season_nb=5)
+game = Game(
+    driver=Driver.driver, league_id="KWGFGJUM", season_number=1, division=1, game_link=games_example[1], game_season_nb=5
+)
 time.sleep(10)
 stop

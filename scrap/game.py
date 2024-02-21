@@ -14,8 +14,9 @@ class Game:
     h_scorers_class = "sc-bcXHqe gnMozL"
     v_goals_class = "sc-bcXHqe gFNZhX"
     v_scorers_class = "sc-bcXHqe bIJtk"
-    right_modules_class = "sc-bcXHqe sc-dmctIk grPqgW jgCKGU"
-    bonus_element_class = "sc-bcXHqe fuCkSG"
+
+    h_bonus_class = "sc-bcXHqe fhMvyb"
+    v_bonus_class = "sc-bcXHqe jSNkIw"
 
     export_game_path = "export/games.parquet"
     export_bonus_path = "export/bonus.parquet"
@@ -135,18 +136,24 @@ class Game:
         The bonus section has the same class as the "Replacements" and "Badges obtained" modules.
         The aim is to retrieve these three elements, then select the second, which should be the bonuses.
 
-        TODO: J'arrive à récupérer tout les bonus mais je ne sais pas comment faire pour savoir quelle équipe en a profité.
+        1-On récupère tout les éléments avec le "bonus_element_class" qui correspond à une brique d'une équipe
+        2-Ces élements prennent autant les briques de "Bonus posés" que de "Badges optenus"
+            => On garde seulement les deux premiers (Bonus h team et bonus v team)
+        3- sc-bcXHqe fhMvyb => H | sc-bcXHqe jSNkIw => V
         """
-        right_modules = self.driver.find_elements(By.XPATH, f"//*[@class='{self.right_modules_class}']")
-        if len(right_modules) != 3:
-            raise AttributeError(
-                f"Waiting to find 3 right modules. Found {len(right_modules)}. Have the right modules display changed ?"
-            )
-        bonus_elements = right_modules[1].find_elements(By.XPATH, f"//*[@class='{self.bonus_element_class}']")
-        logging.info(f"Found {len(bonus_elements)} bonus.")
-        for bonus in bonus_elements:
-            for p in bonus.find_elements(By.TAG_NAME, "p"):
-                print(p.text)
+        h_bonus = self.driver.find_elements(By.XPATH, f"//*[@class='{self.h_bonus_class}']")
+        h_bonus_list = []
+        for bonus in h_bonus:
+            h_bonus_list.append(bonus.find_element(By.TAG_NAME, "p").text)
+
+        v_bonus = self.driver.find_elements(By.XPATH, f"//*[@class='{self.v_bonus_class}']")
+        v_bonus_list = []
+        for bonus in v_bonus:
+            v_bonus_list.append(bonus.find_element(By.TAG_NAME, "p").text)
+
+        print(f"H bonus : {h_bonus_list}")
+        print(f"V bonus : {v_bonus_list}")
+        stop
 
     def db_game_insert(self):
         """_summary_
@@ -275,7 +282,7 @@ class Game:
         self.game_season_nb = game_season_nb
 
         get_url(driver=self.driver, url=game_link)
-        # self.get_bonus_info()
+        self.get_bonus_info()
         self.tab_info = self.get_score_tab_info()
 
         self.game_id = self.create_game_id()
@@ -291,4 +298,4 @@ class Game:
         self.v_real_goals = self.tab_info["v_real_goals"]
         self.v_own_goals = 0
         self.v_red_cards = 0
-        self.db_insert()
+        self.db_game_insert()
