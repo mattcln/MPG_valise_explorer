@@ -34,8 +34,8 @@ class Game:
         "4 défenseurs",
     ]
 
-    export_game_path = "export/games.parquet"
-    export_bonus_path = "export/bonus.parquet"
+    export_game_path = "exports/games.parquet"
+    export_bonus_path = "exports/bonus.parquet"
 
     # Unused
     goals_class = "sc-bcXHqe crTPxA"
@@ -49,7 +49,7 @@ class Game:
         """
         h_team_reduced = self.tab_info["h_team"][:4].strip()
         v_team_reduced = self.tab_info["v_team"][:4].strip()
-        return f"{self.league_id}_{self.season_number}_{self.division}_{h_team_reduced}_{v_team_reduced}"
+        return f"{self.league_id}_{self.season_nb}_{self.division}_{h_team_reduced}_{v_team_reduced}"
 
     def get_team_id(self, home: bool):
         """_summary_
@@ -61,7 +61,7 @@ class Game:
             team = "h_team"
         else:
             team = "v_team"
-        return f"{self.league_id}_{self.season_number}_{self.tab_info[team]}"
+        return f"{self.league_id}_{self.season_nb}_{self.tab_info[team]}"
 
     def get_players_info_df(self, scores_tab_element):
         """_summary_
@@ -214,6 +214,9 @@ class Game:
         df = pl.DataFrame(
             {
                 "match_id": self.game_id,
+                "league_id": self.league_id,
+                "division": self.division,
+                "season_nb": self.season_nb,
                 "h_teamid": self.h_team_id,
                 "v_teamid": self.v_team_id,
                 "h_total_goals": self.h_total_goals,
@@ -298,7 +301,7 @@ class Game:
         self,
         driver,
         league_id: str,
-        season_number: int,
+        season_nb: int,
         division: int,
         game_season_nb: int,
         game_link: str,
@@ -309,7 +312,7 @@ class Game:
 
         :param driver: Selenium driver
         :param league_id: MPG league unique ID (eg: 'KWGFGJUM')
-        :param season_number: Season number
+        :param season_nb: Season number
         :param division: Division
         :param game_season_nb: How many matches has it been th
         is season?
@@ -318,7 +321,7 @@ class Game:
         self.driver = driver
         self.game_link = game_link
         self.league_id = league_id
-        self.season_number = season_number
+        self.season_nb = season_nb
         self.division = division
         self.game_season_nb = game_season_nb
 
