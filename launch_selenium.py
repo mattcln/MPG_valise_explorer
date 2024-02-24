@@ -1,8 +1,3 @@
-import logging
-import time
-
-from selenium.webdriver.support import expected_conditions as EC
-
 from config.config_reader import get_config
 from scrap.game import Game
 from utils.driver import Driver
@@ -27,7 +22,5 @@ games_example = [
 ]
 
 game = Game(
-    driver=Driver.driver, league_id="KWGFGJUM", season_number=1, division=1, game_link=games_example[1], game_season_nb=5
+    driver=Driver.driver, league_id="KWGFGJUM", season_nb=1, division=1, game_link=games_example[2], game_season_nb=5
 )
-time.sleep(10)
-stop
