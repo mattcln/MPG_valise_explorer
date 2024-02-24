@@ -44,7 +44,7 @@ class Game:
     save_goals_color = "#EF1728"
 
     def create_game_id(self):
-        """_summary_
+        """
         Create a unique id for each game
         """
         h_team_reduced = self.tab_info["h_team"][:4].strip()
@@ -52,7 +52,7 @@ class Game:
         return f"{self.league_id}_{self.season_nb}_{self.division}_{h_team_reduced}_{v_team_reduced}"
 
     def get_team_id(self, home: bool):
-        """_summary_
+        """
         Get unique id for each team
         :param home: Is the team home or visitor ?
         :return: _description_
@@ -64,7 +64,7 @@ class Game:
         return f"{self.league_id}_{self.season_nb}_{self.tab_info[team]}"
 
     def get_players_info_df(self, scores_tab_element):
-        """_summary_
+        """
         Receiving the game scores tab element, this function retrieves all players informations displayed there as a pd df.
         1- 'team_goals_element' is either the full element for home team, either the full element for away team
         2- We get each 'scorer' in the 'team_goals_element' = one element by scorer (one scorer can have multiple goals)
@@ -110,18 +110,14 @@ class Game:
         return df_players_info.filter(pl.col("team") == "home"), df_players_info.filter(pl.col("team") == "visitor")
 
     def get_score_tab_info(self):
-        """_summary_
+        """
         Taking all infos in the score table of a game
-        1- Finding the tab element by class - TODO: This might change - be ready to update it.
+        1- Finding the tab element by class
         2- Taking all "p" tag elements
-        3- Returning a dictionnary with all informations - TODO: Order might change. This approach is not robust.
+        3- Returning a dictionnary with all informations
         """
         tableau_scores = self.driver.find_element(By.XPATH, f"//*[@class='{self.tab_info_class}']")
         df_h_players_info, df_v_players_info = self.get_players_info_df(tableau_scores)
-
-        text_lists = []
-        for p in tableau_scores.find_elements(By.TAG_NAME, "p"):
-            text_lists.append(p.text)
 
         tab_info = {}
         teams = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg sc-hbqYmb gappF ePpVLH']")
@@ -173,13 +169,13 @@ class Game:
         return bonus_dict
 
     def get_bonus_info(self):
-        """_summary_
+        """
         The bonus section has the same class as the "Replacements" and "Badges obtained" modules.
         The aim is to retrieve these three elements, then select the second, which should be the bonuses.
 
-        1-On créé un dict par défaut avec tout les bonus des deux équipes à 0
-        2-On parcours tout les élements
-
+        1- Create a default dict with all bonuses for both teams set to 0
+        2- Add all bonus for the 'home' team
+        3- Add all bonus for the 'visitor' team
         """
         bonus_dict = {}
         for t in ["h", "v"]:
@@ -191,25 +187,10 @@ class Game:
         return bonus_dict
 
     def db_game_insert(self):
-        """_summary_
+        """
         Saving game informations in file.
-
-        TODO: Append a parquet file for each game (parquet is good for duckdb)
-        The SQL Schema is planned as :
-        match_id (PK)
-        h_teamid (FK)
-        v_teamid (FK)
-        h_total_goals (int)
-        h_mpg_goals (int)
-        h_real_goals (int)
-        h_own_goals (int)
-        h_red_cards (int)
-        v_total_goals (int)
-        v_mpg_goals (int)
-        v_real_goals (int)
-        v_own_goals (int)
-        v_red_cards (int)
-        gameseason_nb (int)
+        Reading the existing file and appending the current game information.
+        If the file doesn't exist, creating it.
         """
         df = pl.DataFrame(
             {
@@ -241,28 +222,10 @@ class Game:
         print(df)
 
     def db_bonus_insert(self):
-        """_summary_
+        """
         Saving bonus informations in file.
-
-        TODO: Append a parquet file for each game (parquet is good for duckdb)
-        The SQL Schema is planned as :
-        match_id (FK)
-        h_valise (bool)
-        h_ubereats (bool)
-        h_suarez (bool)
-        h_zahia (bool)
-        h_miroir (bool)
-        h_chapron (bool)
-        h_tonton (bool)
-        h_decat (bool)
-        v_valise (bool)
-        v_ubereats (bool)
-        v_suarez (bool)
-        v_zahia (bool)
-        v_miroir (bool)
-        v_chapron (bool)
-        v_tonton (bool)
-        v_decat (bool)
+        Reading the existing file and appending the current game information.
+        If the file doesn't exist, creating it.
         """
         df = pl.DataFrame(
             {
