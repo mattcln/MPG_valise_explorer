@@ -30,8 +30,8 @@ class Game:
         "chapron",
         "tonton",
         "decat",
-        "5 défenseurs",
-        "4 défenseurs",
+        "5défenseurs",
+        "4défenseurs",
     ]
 
     export_game_path = "exports/games.parquet"
@@ -161,9 +161,10 @@ class Game:
 
         all_bonus = self.driver.find_elements(By.XPATH, f"//*[@class='{bonus_class}']")
         for bonus in all_bonus:
-            bonus_name = bonus.find_element(By.TAG_NAME, "p").text.lower()
+            bonus_name = bonus.find_element(By.TAG_NAME, "p").text.lower().replace(" ", "")
+            bonus_name = bonus_name.replace("chapronrouge", "chapron")
             if bonus_name in self.all_bonus_list:
-                bonus_dict[f"{prefix}{bonus_name.replace(' ', '')}"] += 1
+                bonus_dict[f"{prefix}{bonus_name}"] += 1
             else:
                 raise ValueError(f"Found an unknown bonus name : {bonus_name}")
         return bonus_dict

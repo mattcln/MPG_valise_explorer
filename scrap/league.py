@@ -17,38 +17,34 @@ class League:
         matchweek_string = self.driver.find_element(By.XPATH, f"//*[@class='sc-dkrFOg iKscri']").text
         return int(matchweek_string.split(".")[1].split("/")[0].strip())
 
-    def switch_matchweek(self, next=True):
+    def get_driver_to_matchweek(self, matchweek: int):
         """
         Switch driver to the previous or next matchweek
 
         :param next: switch to next matchweek if true, previous otherwise, defaults to True
         """
-        if next:
-            instance = 1
-        else:
-            instance = 0
+        get_url(driver=self.driver, url=self.results_link)
 
         button_XPATH = "//*[@class='sc-ipEyDJ sc-hLirLb xQelv ciiqSe']"
-        self.driver.find_elements(By.XPATH, button_XPATH)[instance].click()
+        while self.get_driver_matchweek() != matchweek:
+            self.driver.find_elements(By.XPATH, button_XPATH)[1].click()
 
-    def _scrap_matchweek_games(self):
-        """
-        Scrap games on the current results driver page
-
-        TODO: Comment faire pour scrapper les matchs un par un, sachant que quand je clique sur un match
-            je perds la journée à laquelle j'étais juste avant... ?
-            => Soit réussir à ouvrir dans un nouvel onglet
-            => Soit refaire tout le trajet pour prendre une autre game à chaque fois...
-        """
+    def get_match_element_url(self, match_element_nb):
+        """ """
         games_XPATH = "//*[@class='sc-bcXHqe sc-gswNZR juGOxZ cjNVfZ']"
-        games = self.driver.find_elements(By.XPATH, games_XPATH)
-        for game in games:
-            time.sleep(99999)
-            ActionChains(self.driver).key_down(Keys.LEFT_CONTROL).pause(1).click(game).key_up(Keys.LEFT_CONTROL).perform()
-            time.sleep(100)
-            # game.click()
-        print(len(games))
-        stop
+        self.driver.find_elements(By.XPATH, games_XPATH)[match_element_nb].click()
+        print(self.driver.current_url)
+        return self.driver.current_url
+
+    def scrap_game(self, game_link: str, game_season_nb: int):
+        Game(
+            driver=self.driver,
+            league_id="KWGFGJUM",
+            season_nb=1,
+            division=1,
+            game_link=game_link,
+            game_season_nb=game_season_nb,
+        )
 
     def scrap_league(self, matchweeks: list = []):
         """
@@ -64,28 +60,31 @@ class League:
         :param matchweeks: list of int of matchweeks to scrap, defaults to []
         """
         matchweeks_scrapped = []
-        matchweek_start = self.get_driver_matchweek()
-        matchweek = 99
-        while matchweek + 1 != matchweek_start:
-            matchweek = self.get_driver_matchweek()
-            if matchweek in matchweeks or not matchweeks:
-                self._scrap_matchweek_games()
-                matchweeks_scrapped.append(matchweek)
-            self.switch_matchweek()
+        games_links = []
+        for matchweek in matchweeks:
+            for match_element_nb in range(int(self.nb_players / 2)):
+                self.get_driver_to_matchweek(matchweek)
+                game_link = self.get_match_element_url(match_element_nb)
+                self.scrap_game(game_link, matchweek)
+            matchweeks_scrapped.append(matchweek)
         print(f"matchweek scrapped : {matchweeks_scrapped}")
-        print(time.sleep(150))
         stop
 
     def __init__(
         self,
         driver,
+        league_id: str,
         results_link: str,
         season_nb: str,
         division: int,
+        nb_players: int,
     ):
         self.driver = driver
+        self.league_id = league_id
+        self.results_link = results_link
         self.season_nb = season_nb
         self.division = division
+        self.nb_players = nb_players
 
         get_url(driver=self.driver, url=results_link)
 

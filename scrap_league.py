@@ -12,11 +12,20 @@ Driver = Driver(docker=config["options"]["is_docker"])
 user = config["credentials"]["username"]
 password = config["credentials"]["password"]
 
+# Load league options
+league_id = config["league"]["league_id"]
+results_link = config["league"]["results_link"]
+season_nb = config["league"]["season_nb"]
+division = config["league"]["division"]
+nb_players = config["league"]["nb_players"]
+
 Driver.logging(user, password)
 
 league = League(
     driver=Driver.driver,
-    results_link="https://mpg.football/winner/mpg_league_KNCUPJTY/mpg_division_KNCUPJTY_1_1/results",
-    season_nb=1,
-    division=1,
+    league_id=league_id,
+    results_link=results_link,
+    season_nb=season_nb,
+    division=division,
+    nb_players=nb_players,
 )
