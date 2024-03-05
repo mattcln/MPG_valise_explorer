@@ -4,10 +4,14 @@
         "username": "your_username",
         "password": "your_password"
     },
-    "season": {
-        "results_link": "https://mpg.football/league/mpg_league_NKU1UAPG/mpg_division_NKU1UAPG_5_2/results",
-        "season_number": 5,
-        "nb_division": 2,
-        "nb_players_per_league": 8
+    "options": {
+        "is_docker": false
+    },
+    "league": {
+        "league_id": "XXXXXXXX",
+        "results_link": "https://mpg.football/league/mpg_league_XXXXXXXX/mpg_division_XXXXXXXX_1_1/results",
+        "season_nb": 1,
+        "division": 1,
+        "nb_players": 6
     }
 }
