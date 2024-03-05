@@ -1,5 +1,6 @@
 import logging
 import time
+from scrap.mpg import MPG
 
 import polars as pl
 
@@ -9,7 +10,7 @@ from selenium.webdriver.common.by import By
 from utils.selenium import get_url
 
 
-class Game:
+class Game(MPG):
     # Tab info
     tab_info_class = "sc-bcXHqe euGzhE"
     tab_info_class = "sc-bcXHqe sc-dmctIk gmwvWu jMJMOc"  ### Permet d'avoir toutes les infos dans le panneau (dont le numéro de la journée et les buteurs)
@@ -32,6 +33,7 @@ class Game:
         "decat",
         "5défenseurs",
         "4défenseurs",
+        "capitaine"
     ]
 
     export_game_path = "exports/games.parquet"
@@ -43,25 +45,6 @@ class Game:
     mpg_goals_color = "#45C945"
     save_goals_color = "#EF1728"
 
-    def create_game_id(self):
-        """
-        Create a unique id for each game
-        """
-        h_team_reduced = self.tab_info["h_team"][:4].strip()
-        v_team_reduced = self.tab_info["v_team"][:4].strip()
-        return f"{self.league_id}_{self.season_nb}_{self.division}_{h_team_reduced}_{v_team_reduced}"
-
-    def get_team_id(self, home: bool):
-        """
-        Get unique id for each team
-        :param home: Is the team home or visitor ?
-        :return: _description_
-        """
-        if home:
-            team = "h_team"
-        else:
-            team = "v_team"
-        return f"{self.league_id}_{self.season_nb}_{self.tab_info[team]}"
 
     def get_players_info_df(self, scores_tab_element):
         """

@@ -1,8 +1,6 @@
 import time
 
-from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 
 from scrap.game import Game
 from utils.selenium import get_url
@@ -29,11 +27,13 @@ class League:
         while self.get_driver_matchweek() != matchweek:
             self.driver.find_elements(By.XPATH, button_XPATH)[1].click()
 
-    def get_match_element_url(self, match_element_nb):
-        """ """
-        games_XPATH = "//*[@class='sc-bcXHqe sc-gswNZR juGOxZ cjNVfZ']"
+    def get_match_element_url(self, match_element_nb: int) -> str:
+        """
+        Click on the n-th match element on the current driver page
+        Returns the game link url
+        """
+        games_XPATH = "//*[@class='sc-bcXHqe sc-gswNZR kondVZ cjNVfZ']"
         self.driver.find_elements(By.XPATH, games_XPATH)[match_element_nb].click()
-        print(self.driver.current_url)
         return self.driver.current_url
 
     def scrap_game(self, game_link: str, game_season_nb: int):
@@ -68,7 +68,6 @@ class League:
                 self.scrap_game(game_link, matchweek)
             matchweeks_scrapped.append(matchweek)
         print(f"matchweek scrapped : {matchweeks_scrapped}")
-        stop
 
     def __init__(
         self,
@@ -88,4 +87,4 @@ class League:
 
         get_url(driver=self.driver, url=results_link)
 
-        self.scrap_league(matchweeks=[7, 9, 10])
+        self.scrap_league(matchweeks=[1])
