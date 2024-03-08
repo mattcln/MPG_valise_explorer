@@ -28,4 +28,5 @@ league = League(
     season_nb=season_nb,
     division=division,
     nb_players=nb_players,
+    matchweeks=[1]
 )

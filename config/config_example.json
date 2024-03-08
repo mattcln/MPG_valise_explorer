@@ -13,5 +13,8 @@
         "season_nb": 1,
         "division": 1,
         "nb_players": 6
+    },
+    "team": {
+        "name": "XXXXXX"
     }
 }

@@ -39,9 +39,9 @@ class League:
     def scrap_game(self, game_link: str, game_season_nb: int):
         Game(
             driver=self.driver,
-            league_id="KWGFGJUM",
-            season_nb=1,
-            division=1,
+            league_id=self.league_id,
+            season_nb=self.season_nb,
+            division=self.division,
             game_link=game_link,
             game_season_nb=game_season_nb,
         )
@@ -77,6 +77,7 @@ class League:
         season_nb: str,
         division: int,
         nb_players: int,
+        matchweeks: list,
     ):
         self.driver = driver
         self.league_id = league_id
@@ -87,4 +88,4 @@ class League:
 
         get_url(driver=self.driver, url=results_link)
 
-        self.scrap_league(matchweeks=[1])
+        self.scrap_league(matchweeks=matchweeks)

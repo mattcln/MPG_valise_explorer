@@ -33,7 +33,7 @@ def get_total_team_bonus_played(team_id: str) -> dict:
         """
             ).fetchnumpy()
         )
-    return {k: int(results[0].get(k, 0) + results[1].get(k, 0)) for k in results[0]}
+    return {k: int((results[0].get(k, 0) or 0) + (results[1].get(k, 0) or 0)) for k in results[0]}
 
 
 def get_remaining_bonus_player(team_id: str, nb_players: int):

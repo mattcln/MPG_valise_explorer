@@ -146,6 +146,7 @@ class Game(MPG):
         for bonus in all_bonus:
             bonus_name = bonus.find_element(By.TAG_NAME, "p").text.lower().replace(" ", "")
             bonus_name = bonus_name.replace("chapronrouge", "chapron")
+            bonus_name = bonus_name.replace("lavaliseànanard", "valise")
             if bonus_name in self.all_bonus_list:
                 bonus_dict[f"{prefix}{bonus_name}"] += 1
             else:
