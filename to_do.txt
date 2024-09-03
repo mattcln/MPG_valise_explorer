@@ -1,7 +1,11 @@
-1- Ajouter un stop du scrapping propre quand on arrive à la première journée pas encore terminée
-
-2- Ajouter un drop duplicates à la fin des pipelines ?
-
-3- Régler les soucis avec le turn on / off de la VM Azure
-
-4- Scrapper les transferts
+1- Clarifier l'exécution du script
+    a- Refaire en sorte de save les données en local
+    b- Ecrire les fichiers en .parquet, disponible dans l'historique du fichier game.py sur git. 
+2- Se renseigner sur Streamlit
+    https://medium.com/@octavianzarzu/build-and-deploy-apps-with-duckdb-and-streamlit-in-under-one-hour-852cd31cccce
+3- Construire un plan / schéma Streamlit
+    a- Un bouton pour scrapper une ligue
+        => Lancement du script checker quels matchs sont déjà en base
+        => Exécution du script pour scrapper ceux qui ne le sont pas
+    b- Une fenêtre pour voir les bonus restants
+        => Prévoir un filtre par league
