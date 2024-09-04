@@ -6,6 +6,7 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.blob import BlobServiceClient
 
 
+@DeprecationWarning("This class is not used anymore. 04/09/2024")
 class AzureUtils:
     """
     Cette classe permet de lire et écrire des blobs depuis le container Azure MPG_valise_explorer par défaut.

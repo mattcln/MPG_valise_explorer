@@ -1,8 +1,9 @@
 import duckdb
 
-from utils import duckdb_helper
 from utils.bonus import bonus
-from utils.duckdb_helper import azure_secret
+
+game_file_path = "exports/games.parquet"
+bonus_file_path = "exports/bonus.parquet"
 
 
 def get_json_bonus():
@@ -25,8 +26,8 @@ def get_total_team_bonus_played(team_id: str) -> dict:
             SUM({prefix}chapron) AS chapron,
             SUM({prefix}tontonpat) AS tontonpat,
             SUM({prefix}decat) AS decat
-        FROM 'azure://scrapping-exports/exports/games.parquet' G
-        INNER JOIN 'azure://scrapping-exports/exports/bonus.parquet' B ON G.match_id = B.match_id
+        FROM '{game_file_path}' G
+        INNER JOIN '{bonus_file_path}' B ON G.match_id = B.match_id
         WHERE {prefix}teamid = '{team_id}'
         GROUP BY {prefix}teamid
         """
@@ -45,7 +46,7 @@ def get_all_team_ids(league_id, season_nb):
     query = f"""
     SELECT 
         DISTINCT(h_teamid)
-    FROM 'azure://scrapping-exports/exports/games.parquet' G
+    FROM '{game_file_path}' G
     WHERE G.league_id = '{league_id}'
     AND G.season_nb = '{season_nb}'
     """
@@ -68,7 +69,6 @@ def get_remaining_bonus_player(team_id: str, nb_players: int):
     if nb_players not in [4, 6, 8, 10]:
         raise ValueError("Number of players must be one of : [4, 6, 8, 10]")
 
-    duckdb_helper.azure_secret()
     bonus = get_json_bonus()
     start_bonus = bonus[f"{nb_players}_players"]
 
@@ -79,7 +79,8 @@ def get_remaining_bonus_player(team_id: str, nb_players: int):
 
 def get_all_players_bonus(league_id, season_nb, nb_players: int):
     """
-    Returns the number of bonuses remaining for the team in a particular league
+    Returns all remaining bonuses for all players in a league.
+    Returned string is in HTML format.
 
     1- Retrieves the number of starting bonuses according to league size
     2- Returns the number of bonuses played since the start of the season
@@ -93,7 +94,6 @@ def get_all_players_bonus(league_id, season_nb, nb_players: int):
     if nb_players not in [4, 6, 8, 10]:
         raise ValueError("Number of players must be one of : [4, 6, 8, 10]")
 
-    azure_secret()
     bonus = get_json_bonus()
     start_bonus = bonus[f"{nb_players}_players"]
 
@@ -103,7 +103,6 @@ def get_all_players_bonus(league_id, season_nb, nb_players: int):
     for team_id in team_ids:
         bonus_played = get_total_team_bonus_played(team_id)
         remaining_bonus = {k: start_bonus.get(k, 0) - bonus_played.get(k, 0) for k in bonus_played}
-        # print(f"Remaining bonuses of {team_id.split('_')[2:]} are:")
         full_text = full_text + f"<p>Remaining bonuses of {'_'.join(team_id.split('_')[2:])} are:"
         for bonus in remaining_bonus:
             full_text = full_text + f"{bonus} : {remaining_bonus[bonus]}<br>"

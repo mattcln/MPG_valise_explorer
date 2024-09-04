@@ -1,5 +1,3 @@
-from kestra import Kestra
-
 from config.config_reader import get_config
 from sql.ddb_bonus import get_all_players_bonus
 from utils.log import init_logger
@@ -16,4 +14,4 @@ all_bonus_text = get_all_players_bonus(league_id=league_id, season_nb=config["SE
 
 outputs = {"all_bonus_text": all_bonus_text}
 
-Kestra.outputs(outputs)
+print(outputs)
