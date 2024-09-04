@@ -1,6 +1,7 @@
-from game import Game
 from selenium.webdriver.common.by import By
-from selenium_helper import get_url
+
+from scrap.game import Game
+from utils.selenium_helper import get_url
 
 
 class League:

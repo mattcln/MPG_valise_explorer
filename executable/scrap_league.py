@@ -1,7 +1,7 @@
-from config_reader import get_config
-from driver import Driver
-from league import League
-from log import init_logger
+from config.config_reader import get_config
+from scrap.league import League
+from utils.driver import Driver
+from utils.log import init_logger
 
 init_logger()
 config = get_config()
