@@ -12,18 +12,21 @@ class League:
         Return on which matchweek driver is pointing
         matchweek_string ex : "Résultat J.5 /14"
         """
-        matchweek_string = self.driver.find_element(By.XPATH, f"//*[@class='sc-dkrFOg iKscri']").text
-        return int(matchweek_string.split(".")[1].split("/")[0].strip())
+        matchweek_string = self.driver.find_element(By.XPATH, f"//*[@class='sc-bcXHqe eDkcLt']").text
+        return int(matchweek_string.split(" ")[1])
 
     def get_driver_to_matchweek(self, matchweek: int):
         """
         Switch driver to the previous or next matchweek
 
+        button XPATH is not the same when executing with Selenium and in local. (why ?)
+        => Might change soon again
+
         :param next: switch to next matchweek if true, previous otherwise, defaults to True
         """
         get_url(driver=self.driver, url=self.results_link)
 
-        button_XPATH = "//*[@class='sc-ipEyDJ sc-hLirLb xQelv ciiqSe']"
+        button_XPATH = "//*[@class='sc-ipEyDJ sc-kTxHUi xQelv droxzY']"
         while self.get_driver_matchweek() != matchweek:
             self.driver.find_elements(By.XPATH, button_XPATH)[1].click()
 
@@ -32,7 +35,7 @@ class League:
         Click on the n-th match element on the current driver page
         Returns the game link url
         """
-        games_XPATH = "//*[@class='sc-bcXHqe sc-gswNZR kondVZ cjNVfZ']"
+        games_XPATH = "//*[@class='sc-bhNKFk iZBBjh']"
         self.driver.find_elements(By.XPATH, games_XPATH)[match_element_nb].click()
         return self.driver.current_url
 

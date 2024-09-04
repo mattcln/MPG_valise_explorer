@@ -1,7 +1,8 @@
 import polars as pl
 
 from scrap.mpg import MPG
-from utils.azure import AzureUtils
+
+# from utils.azure import AzureUtils
 
 pl.Config(tbl_cols=22)
 from selenium.webdriver.common.by import By
@@ -12,7 +13,8 @@ from utils.selenium import get_url
 class Game(MPG):
     # Tab info
     tab_info_class = "sc-bcXHqe euGzhE"
-    tab_info_class = "sc-bcXHqe sc-dmctIk gmwvWu jMJMOc"  ### Permet d'avoir toutes les infos dans le panneau (dont le numéro de la journée et les buteurs)
+    ### Permet d'avoir toutes les infos dans le panneau (dont le numéro de la journée et les buteurs)
+    tab_info_class = "sc-dkrFOg ctEPJR"
     h_goals_class = "sc-bcXHqe fNHVxg"
     h_scorers_class = "sc-bcXHqe gnMozL"
     v_goals_class = "sc-bcXHqe gFNZhX"
@@ -96,15 +98,16 @@ class Game(MPG):
         df_h_players_info, df_v_players_info = self.get_players_info_df(tableau_scores)
 
         tab_info = {}
-        teams = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg sc-hbqYmb gappF ePpVLH']")
+
+        teams = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-bcXHqe sc-bJYTlW fDpWNH iczewo']")
         tab_info["h_team"] = teams[0].text.replace(" ", "_")
         tab_info["v_team"] = teams[1].text.replace(" ", "_")
 
-        players = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-dkrFOg dciwac']")
+        players = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-bcXHqe ipbQXG']")
         tab_info["h_player"] = players[0].text.replace(" ", "_")
         tab_info["v_player"] = players[3].text.replace(" ", "_")
 
-        score = tableau_scores.find_element(By.XPATH, f"//*[@class='sc-dkrFOg sc-jTjUTQ dfVVDa ibfwxi']").text
+        score = tableau_scores.find_element(By.XPATH, f"//*[@class='sc-bcXHqe sc-fvEvSO iGGeHo eKGHpZ']").text
         tab_info["h_score"] = int(score.split(" ")[0])
         tab_info["v_score"] = int(score.split(" ")[2])
 
@@ -200,11 +203,11 @@ class Game(MPG):
             }
         )
         try:
-            historical_df = pl.read_parquet(self.AzureUtils.read_file(self.export_game_path))
+            historical_df = pl.read_parquet(self.export_game_path)
             df = historical_df.vstack(df)
-        except TypeError:
+        except FileNotFoundError:
             print("No history file found.")
-        self.AzureUtils.write_file(data=df, path=self.export_game_path)
+        df.write_parquet(self.export_game_path)
         print(f"Games file now has a lenght of {df.select(pl.count())[0,0]} rows.")
 
     def db_bonus_insert(self):
@@ -239,11 +242,11 @@ class Game(MPG):
             }
         )
         try:
-            historical_df = pl.read_parquet(self.AzureUtils.read_file(self.export_bonus_path))
+            historical_df = pl.read_parquet(self.export_bonus_path)
             df = historical_df.vstack(df)
-        except TypeError:
+        except FileNotFoundError:
             print("No history file found.")
-        self.AzureUtils.write_file(data=df, path=self.export_bonus_path)
+        df.write_parquet(self.export_bonus_path)
         print(f"Bonus file now has a lenght of {df.select(pl.count())[0,0]} rows.")
 
     def __init__(
@@ -273,7 +276,7 @@ class Game(MPG):
         self.season_nb = season_nb
         self.division = division
         self.matchweek = matchweek
-        self.AzureUtils = AzureUtils()
+        # self.AzureUtils = AzureUtils()
 
         get_url(driver=self.driver, url=game_link)
 

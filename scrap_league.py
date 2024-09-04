@@ -10,6 +10,7 @@ Driver = Driver(docker=config["IS_DOCKER"])
 # Define your credentials
 user = config["MAIL"]
 password = config["PASSWORD"]
+
 Driver.logging(user, password)
 
 league = League(
