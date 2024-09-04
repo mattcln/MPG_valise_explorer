@@ -7,9 +7,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium_helper import get_url
 from webdriver_manager.chrome import ChromeDriverManager
-
-from utils.selenium import get_url
 
 
 class Driver:

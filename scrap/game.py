@@ -1,13 +1,11 @@
 import polars as pl
-
-from scrap.mpg import MPG
+from mpg import MPG
 
 # from utils.azure import AzureUtils
 
 pl.Config(tbl_cols=22)
 from selenium.webdriver.common.by import By
-
-from utils.selenium import get_url
+from selenium_helper import get_url
 
 
 class Game(MPG):

@@ -1,9 +1,6 @@
-import time
-
+from game import Game
 from selenium.webdriver.common.by import By
-
-from scrap.game import Game
-from utils.selenium import get_url
+from selenium_helper import get_url
 
 
 class League:
