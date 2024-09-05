@@ -1,9 +1,1 @@
-1- Réorganiser les scripts pour qu'il ne s'exécute pas quand on appelle le script (les mettre dans une classe par exemple)
-2- Se renseigner sur Streamlit
-    https://medium.com/@octavianzarzu/build-and-deploy-apps-with-duckdb-and-streamlit-in-under-one-hour-852cd31cccce
-3- Construire un plan / schéma Streamlit
-    a- Un bouton pour scrapper une ligue
-        => Lancement du script checker quels matchs sont déjà en base
-        => Exécution du script pour scrapper ceux qui ne le sont pas
-    b- Une fenêtre pour voir les bonus restants
-        => Prévoir un filtre par league
+1- Revoir le scrap des matchs (soit les infos ne sont pas récupérées, soit j'ai une erreur)
