@@ -1,11 +1,7 @@
-import json
-import os
-
 import duckdb
 
-from utils import duckdb_helper
-
-bonus_json_path = "utils/bonus.json"
+game_file_path = "exports/games.parquet"
+bonus_file_path = "exports/bonus.parquet"
 
 
 def get_matchweeks_scrapped(league_id, division, season_nb, nb_players):
@@ -21,13 +17,12 @@ def get_matchweeks_scrapped(league_id, division, season_nb, nb_players):
     :raises ValueError: Raise an error if nb players in not possible
     :return: dict with number of remaining bonus
     """
-    duckdb_helper.azure_secret()
 
     query = f"""
     SELECT
         matchweek,
         COUNT(DISTINCT match_id) AS nb_games
-    FROM 'azure://scrapping-exports/exports/games.parquet'
+    FROM '{game_file_path}'
     WHERE league_id = '{league_id}'
         AND division = '{division}'
         AND season_nb = '{season_nb}'

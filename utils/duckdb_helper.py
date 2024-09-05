@@ -1,9 +1,10 @@
 import os
 
 import duckdb
+from typing_extensions import deprecated
 
 
-@DeprecationWarning("This function is not used anymore. 04/09/2024")
+@deprecated("This function is not used anymore. 04/09/2024")
 def azure_secret():
     """
     This function is connection DuckDB to our Azure storage using connection string

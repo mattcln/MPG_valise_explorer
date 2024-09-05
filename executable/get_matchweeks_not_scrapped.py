@@ -1,5 +1,3 @@
-from kestra import Kestra
-
 from config.config_reader import get_config
 from sql.ddb_matchweek_not_scrapped import get_matchweeks_not_scrapped
 from utils.log import init_logger
@@ -17,4 +15,4 @@ matchweeks_not_scrapped = get_matchweeks_not_scrapped(
 
 outputs = {"matchweeks_not_scrapped": matchweeks_not_scrapped}
 
-Kestra.outputs(outputs)
+print(outputs)
