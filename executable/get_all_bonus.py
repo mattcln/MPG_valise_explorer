@@ -5,10 +5,8 @@ from utils.log import init_logger
 init_logger()
 config = get_config()
 
-all_bonus_text = get_all_players_bonus(
+all_bonus_df = get_all_players_bonus(
     league_id=config["LEAGUE_ID"], season_nb=config["SEASON_NB"], nb_players=config["NB_PLAYERS"]
 )
 
-outputs = {"all_bonus_text": all_bonus_text}
-
-print(outputs)
+print(all_bonus_df)

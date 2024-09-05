@@ -1,4 +1,5 @@
 import duckdb
+import polars as pl
 
 from utils.bonus import bonus
 
@@ -99,12 +100,13 @@ def get_all_players_bonus(league_id, season_nb, nb_players: int):
 
     team_ids = get_all_team_ids(league_id=league_id, season_nb=season_nb)["h_teamid"]
 
-    full_text = ""
+    bonus_df = pl.DataFrame()
     for team_id in team_ids:
         bonus_played = get_total_team_bonus_played(team_id)
         remaining_bonus = {k: start_bonus.get(k, 0) - bonus_played.get(k, 0) for k in bonus_played}
-        full_text = full_text + f"<p>Remaining bonuses of {'_'.join(team_id.split('_')[2:])} are:"
+        new_row = {}
+        new_row["team"] = team_id
         for bonus in remaining_bonus:
-            full_text = full_text + f"{bonus} : {remaining_bonus[bonus]}<br>"
-        full_text = full_text + "</p>"
-    return full_text
+            new_row[bonus] = remaining_bonus[bonus]
+        bonus_df = bonus_df.vstack(pl.DataFrame(new_row))
+    return bonus_df.sort("team")
