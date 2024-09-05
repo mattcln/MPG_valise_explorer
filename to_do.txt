@@ -1,8 +1,4 @@
-1- Clarifier l'exécution du script
-    a- Refaire en sorte de save les données en local
-    b- Ecrire les fichiers en .parquet, disponible dans l'historique du fichier game.py sur git.
-    c- Recomprendre le fonctionnement des scripts get_matchweeks_not_scrapped, get_all_bonus et scrap_league
-    Pour comprendre comment les faire fonctionner ensemble en un clique (ou un nouveau script ? potentiellement réorganiser les exécutables).
+1- Réorganiser les scripts pour qu'il ne s'exécute pas quand on appelle le script (les mettre dans une classe par exemple)
 2- Se renseigner sur Streamlit
     https://medium.com/@octavianzarzu/build-and-deploy-apps-with-duckdb-and-streamlit-in-under-one-hour-852cd31cccce
 3- Construire un plan / schéma Streamlit
