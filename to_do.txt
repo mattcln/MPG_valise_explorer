@@ -1,1 +1,7 @@
 1- Revoir le scrap des matchs (soit les infos ne sont pas récupérées, soit j'ai une erreur)
+2- Améliorer la page "Games"
+    => Faire la jointure sur les bonus
+    => Améliorer les filtres
+3- Différencier les buts mpg & buts réels
+4- Faire une nouvelle page qui me permet de lancer quelques fonctions
+    => Drop duplicates 

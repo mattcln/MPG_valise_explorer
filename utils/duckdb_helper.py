@@ -50,3 +50,33 @@ def get_all_seasons_nb(league_id: str) -> list:
         .tolist()
     )
     return seasons_nb
+
+
+def get_nb_players(league_id: str, season_nb: int) -> list:
+
+    seasons_nb = (
+        duckdb.query(
+            f"""
+        SELECT
+            COUNT(DISTINCT id) AS nb_games
+        FROM (
+            SELECT 
+                h_teamid AS id
+            FROM '{games_file_path}'
+            WHERE 
+                league_id = '{league_id}' AND
+                season_nb = '{season_nb}'
+            UNION
+            SELECT 
+                v_teamid AS id
+            FROM '{games_file_path}'
+            WHERE 
+                league_id = '{league_id}' AND
+                season_nb = '{season_nb}'
+        ) AS ids
+        """
+        )
+        .fetchnumpy()["nb_games"]
+        .tolist()
+    )
+    return seasons_nb[0]

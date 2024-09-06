@@ -13,10 +13,10 @@ class Game(MPG):
     tab_info_class = "sc-bcXHqe euGzhE"
     ### Permet d'avoir toutes les infos dans le panneau (dont le numéro de la journée et les buteurs)
     tab_info_class = "sc-dkrFOg ctEPJR"
-    h_goals_class = "sc-bcXHqe fNHVxg"
-    h_scorers_class = "sc-bcXHqe gnMozL"
-    v_goals_class = "sc-bcXHqe gFNZhX"
-    v_scorers_class = "sc-bcXHqe bIJtk"
+    h_goals_class = "sc-dkrFOg lgPEGu"
+    h_scorers_class = "sc-dkrFOg csfUDl"
+    v_goals_class = "sc-dkrFOg eFOIVV"
+    v_scorers_class = "sc-dkrFOg iZQrFK"
 
     # Bonus
     h_bonus_class = "sc-bcXHqe fhMvyb"
@@ -72,12 +72,16 @@ class Game(MPG):
                 scorers_class = self.v_scorers_class
 
             for scorer in scores_tab_element.find_elements(
-                By.XPATH, f"//*[@class='sc-bcXHqe drrRfn'][1]//*[@class='{goals_class}']//*[@class='{scorers_class}']"
+                By.XPATH, f"//*[@class='sc-dkrFOg fvcsyE']//*[@class='{goals_class}']//*[@class='{scorers_class}']"
             ):
                 scorer_infos = {}
-                scorer_infos["name"] = scorer.find_elements(By.TAG_NAME, "p")[1].text
+                # Je prends les deux parce qu'il y en a toujours un vide et que l'ordre change de temps en temps
+                scorer_infos["name"] = (
+                    scorer.find_elements(By.TAG_NAME, "p")[0].text + scorer.find_elements(By.TAG_NAME, "p")[1].text
+                )
                 scorer_infos["real_goals"] = len(scorer.find_elements(By.TAG_NAME, "svg"))
                 scorer_infos["team"] = team
+                print(f"scorer_infos : {scorer_infos}")
                 players_info.append(scorer_infos)
 
         df_players_info = pl.DataFrame(players_info, schema=["name", "real_goals", "mpg_goals", "own_goals", "team"])
@@ -98,8 +102,14 @@ class Game(MPG):
         tab_info = {}
 
         teams = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-bcXHqe sc-bJYTlW fDpWNH iczewo']")
-        tab_info["h_team"] = teams[0].text.replace(" ", "_")
-        tab_info["v_team"] = teams[1].text.replace(" ", "_")
+        try:
+            tab_info["h_team"] = teams[0].text.replace(" ", "_")
+        except IndexError:
+            tab_info["h_team"] = "Unknown_team"
+        try:
+            tab_info["v_team"] = teams[1].text.replace(" ", "_")
+        except IndexError:
+            tab_info["v_team"] = "Unknown_team"
 
         players = tableau_scores.find_elements(By.XPATH, f"//*[@class='sc-bcXHqe ipbQXG']")
         tab_info["h_player"] = players[0].text.replace(" ", "_")
@@ -274,11 +284,11 @@ class Game(MPG):
         self.season_nb = season_nb
         self.division = division
         self.matchweek = matchweek
-        # self.AzureUtils = AzureUtils()
 
         get_url(driver=self.driver, url=game_link)
 
         self.tab_info = self.get_score_tab_info()
+        print(self.tab_info)
 
         self.game_id = self.create_game_id()
         self.h_team_id = self.get_team_id(home=True)

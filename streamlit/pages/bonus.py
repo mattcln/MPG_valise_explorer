@@ -1,7 +1,7 @@
 import streamlit as st
 from config.config_reader import get_config
 from sql.ddb_bonus import get_all_players_bonus
-from utils.duckdb_helper import get_all_league_ids, get_all_seasons_nb
+from utils.duckdb_helper import get_all_league_ids, get_all_seasons_nb, get_nb_players
 from utils.log import init_logger
 
 st.set_page_config(layout="wide")
@@ -23,9 +23,10 @@ selected_season = st.selectbox(
     "Quelle saison ?",
     (seasons),
 )
-select_age = st.slider("Combien de joueurs y a t-il par division ?", 4, 10, 6, step=2)
+nb_players = get_nb_players(league_id=selected_league_id, season_nb=selected_season)
+st.write(f"J'ai trouvé {nb_players} joueurs dans cette saison.")
 
 
-all_bonus_df = get_all_players_bonus(league_id=selected_league_id, season_nb=selected_season, nb_players=select_age)
+all_bonus_df = get_all_players_bonus(league_id=selected_league_id, season_nb=selected_season, nb_players=nb_players)
 
-st.write("Voici les bonus restants pour les joueurs de la ligue XXXX: ", all_bonus_df)
+st.write(f"Voici les bonus restants pour les joueurs de la ligue {selected_league_id}: ", all_bonus_df)
