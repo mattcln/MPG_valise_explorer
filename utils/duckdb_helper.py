@@ -52,7 +52,7 @@ def get_all_seasons_nb(league_id: str) -> list:
     return seasons_nb
 
 
-def get_nb_players(league_id: str, season_nb: int) -> list:
+def get_nb_players(league_id: str, season_nb: int, division: int) -> list:
 
     seasons_nb = (
         duckdb.query(
@@ -65,14 +65,16 @@ def get_nb_players(league_id: str, season_nb: int) -> list:
             FROM '{games_file_path}'
             WHERE 
                 league_id = '{league_id}' AND
-                season_nb = '{season_nb}'
+                season_nb = '{season_nb}' AND
+                division = '{division}'
             UNION
             SELECT 
                 v_teamid AS id
             FROM '{games_file_path}'
             WHERE 
                 league_id = '{league_id}' AND
-                season_nb = '{season_nb}'
+                season_nb = '{season_nb}' AND
+                division = '{division}'
         ) AS ids
         """
         )

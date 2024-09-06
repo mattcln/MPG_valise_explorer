@@ -19,8 +19,8 @@ class Game(MPG):
     v_scorers_class = "sc-dkrFOg iZQrFK"
 
     # Bonus
-    h_bonus_class = "sc-bcXHqe fhMvyb"
-    v_bonus_class = "sc-bcXHqe jSNkIw"
+    h_bonus_class = "sc-dkrFOg hZCHax"
+    v_bonus_class = "sc-dkrFOg hUtfiy"
     all_bonus_list = [
         "valise",
         "ubereats",
@@ -81,7 +81,6 @@ class Game(MPG):
                 )
                 scorer_infos["real_goals"] = len(scorer.find_elements(By.TAG_NAME, "svg"))
                 scorer_infos["team"] = team
-                print(f"scorer_infos : {scorer_infos}")
                 players_info.append(scorer_infos)
 
         df_players_info = pl.DataFrame(players_info, schema=["name", "real_goals", "mpg_goals", "own_goals", "team"])
@@ -156,7 +155,7 @@ class Game(MPG):
             bonus_name = bonus_name.replace("chapronrouge", "chapron")
             bonus_name = bonus_name.replace("lavaliseànanard", "valise")
             bonus_name = bonus_name.replace("4-decat'", "4decat")
-            print(self.all_bonus_list)
+            bonus_name = bonus_name.replace("mcdo+", "ubereats")  # Ancien nom
             if bonus_name in self.all_bonus_list:
                 bonus_dict[f"{prefix}{bonus_name}"] += 1
                 if bonus_name == "miroir":
@@ -288,7 +287,6 @@ class Game(MPG):
         get_url(driver=self.driver, url=game_link)
 
         self.tab_info = self.get_score_tab_info()
-        print(self.tab_info)
 
         self.game_id = self.create_game_id()
         self.h_team_id = self.get_team_id(home=True)

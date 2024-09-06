@@ -52,5 +52,6 @@ if matchweek_not_scrapped:
             nb_players=selected_nb_players,
             matchweeks=matchweek_not_scrapped,
         )
+        Driver.driver.quit()
 else:
     st.write(f"All games are already scrapped.")

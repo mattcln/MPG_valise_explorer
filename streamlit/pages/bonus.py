@@ -23,7 +23,10 @@ selected_season = st.selectbox(
     "Quelle saison ?",
     (seasons),
 )
-nb_players = get_nb_players(league_id=selected_league_id, season_nb=selected_season)
+
+selected_division = st.number_input("Quelle division ?", step=1)
+
+nb_players = get_nb_players(league_id=selected_league_id, season_nb=selected_season, division=selected_division)
 st.write(f"J'ai trouvé {nb_players} joueurs dans cette saison.")
 
 
