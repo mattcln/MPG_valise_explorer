@@ -30,6 +30,9 @@ nb_players = get_nb_players(league_id=selected_league_id, season_nb=selected_sea
 st.write(f"J'ai trouvé {nb_players} joueurs dans cette saison.")
 
 
-all_bonus_df = get_all_players_bonus(league_id=selected_league_id, season_nb=selected_season, nb_players=nb_players)
+if st.button("Montre moi les bonus restants"):
+    all_bonus_df = get_all_players_bonus(
+        league_id=selected_league_id, season_nb=selected_season, nb_players=nb_players, division=selected_division
+    )
 
-st.write(f"Voici les bonus restants pour les joueurs de la ligue {selected_league_id}: ", all_bonus_df)
+    st.write(f"Voici les bonus restants pour les joueurs de la ligue {selected_league_id}: ", all_bonus_df)

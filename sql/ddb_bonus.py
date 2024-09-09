@@ -37,9 +37,9 @@ def get_total_team_bonus_played(team_id: str) -> dict:
     return {k: int((results[0].get(k, 0) or 0) + (results[1].get(k, 0) or 0)) for k in results[0]}
 
 
-def get_all_team_ids(league_id, season_nb):
+def get_all_team_ids(league_id, season_nb, division):
     """
-    Retourne tout les ids des joueurs d'une saison en particulier
+    Retourne tout les ids des joueurs d'une division en particulier
 
     :param league_id: _description_
     :param season_nb: _description_
@@ -50,6 +50,7 @@ def get_all_team_ids(league_id, season_nb):
     FROM '{game_file_path}' G
     WHERE G.league_id = '{league_id}'
     AND G.season_nb = '{season_nb}'
+    AND G.division = '{division}'
     """
     return duckdb.query(query).fetchnumpy()
 
@@ -78,7 +79,7 @@ def get_remaining_bonus_player(team_id: str, nb_players: int):
     return {k: start_bonus.get(k, 0) - bonus_played.get(k, 0) for k in bonus_played}
 
 
-def get_all_players_bonus(league_id, season_nb, nb_players: int):
+def get_all_players_bonus(league_id: str, season_nb: int, nb_players: int, division: int):
     """
     Returns all remaining bonuses for all players in a league.
     Returned string is in HTML format.
@@ -98,7 +99,7 @@ def get_all_players_bonus(league_id, season_nb, nb_players: int):
     bonus = get_json_bonus()
     start_bonus = bonus[f"{nb_players}_players"]
 
-    team_ids = get_all_team_ids(league_id=league_id, season_nb=season_nb)["h_teamid"]
+    team_ids = get_all_team_ids(league_id=league_id, season_nb=season_nb, division=division)["h_teamid"]
 
     bonus_df = pl.DataFrame()
     for team_id in team_ids:
