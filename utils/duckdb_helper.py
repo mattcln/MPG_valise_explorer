@@ -20,7 +20,10 @@ def azure_secret():
 
 
 def get_all_league_ids() -> list:
-
+    """
+    Cette fonction retourne les 'league_id' distincts présents dans le fichier 'games.parquet'
+    Le résultat est renvoyé sous forme de liste, ordonnée par league_id
+    """
     league_ids = (
         duckdb.query(
             f"""
@@ -37,7 +40,11 @@ def get_all_league_ids() -> list:
 
 
 def get_all_seasons_nb(league_id: str) -> list:
-
+    """
+    Cette fonction retourne les 'season_nb' distincts présents dans le fichier 'games.parquet'
+    pour un 'league_id' donné en paramètre
+    Le résultat est renvoyé sous forme de liste, ordonnée par season_nb
+    """
     seasons_nb = (
         duckdb.query(
             f"""
@@ -55,7 +62,11 @@ def get_all_seasons_nb(league_id: str) -> list:
 
 
 def get_all_divisions_nb(league_id: str, season: int) -> list:
-
+    """
+    Cette fonction retourne les 'division' distincts présents dans le fichier 'games.parquet'
+    pour un 'league_id' et une 'season' donnés en paramètres
+    Le résultat est renvoyé sous forme de liste, ordonnée par division
+    """
     divisions_nb = (
         duckdb.query(
             f"""
