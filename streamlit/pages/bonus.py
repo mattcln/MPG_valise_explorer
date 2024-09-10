@@ -11,58 +11,39 @@ from utils.log import init_logger
 
 st.set_page_config(layout="wide")
 
-# Utilisation de session_state pour stocker les sélections
-if "selected_league_id" not in st.session_state:
-    st.session_state["selected_league_id"] = None
-if "selected_season" not in st.session_state:
-    st.session_state["selected_season"] = None
-if "selected_division" not in st.session_state:
-    st.session_state["selected_division"] = None
-
 st.title("Bonus restants")
 
 init_logger()
 config = get_config()
 
-print()
-print()
 league_ids = get_all_league_ids()
-# print(f"league_ids = {league_ids}")
 
-st.session_state["selected_league_id"] = st.selectbox(
-    "De quelle ligue voulez-vous connaître les bonus restants ?", (league_ids)
-)
-# print(f"selected league id {st.session_state.selected_league_id}")
+selected_league_id = st.selectbox("De quelle ligue voulez-vous connaître les bonus restants ?", (league_ids))
 
-if st.session_state["selected_league_id"]:
-    seasons = get_all_seasons_nb(league_id=st.session_state["selected_league_id"])
+if selected_league_id:
+    seasons = get_all_seasons_nb(league_id=selected_league_id)
     selected_season = st.selectbox(
         "Quelle saison ?",
         (seasons),
     )
-    # print(f"seasons = {seasons}")
 
     if seasons:
-        divisions = get_all_divisions_nb(league_id=st.session_state["selected_league_id"], season=selected_season)
-        # print(f"divisions = {divisions}")
-        # print(f"divisions = {divisions.sort()}")
+        divisions = get_all_divisions_nb(league_id=selected_league_id, season=selected_season)
         selected_division = st.selectbox("Quelle division ?", (divisions))
 
         if divisions:
-            nb_players = get_nb_players(
-                league_id=st.session_state["selected_league_id"], season_nb=selected_season, division=selected_division
-            )
+            nb_players = get_nb_players(league_id=selected_league_id, season_nb=selected_season, division=selected_division)
             st.write(f"J'ai trouvé {nb_players} joueurs dans cette saison.")
 
             if st.button("Montre moi les bonus restants"):
                 all_bonus_df = get_all_players_bonus(
-                    league_id=st.session_state["selected_league_id"],
+                    league_id=selected_league_id,
                     season_nb=selected_season,
                     nb_players=nb_players,
                     division=selected_division,
                 )
 
                 st.write(
-                    f"Voici les bonus restants pour les joueurs de la ligue {st.session_state['selected_league_id']}: ",
+                    f"Voici les bonus restants pour les joueurs de la ligue {selected_league_id}: ",
                     all_bonus_df,
                 )
