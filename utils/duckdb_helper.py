@@ -27,6 +27,7 @@ def get_all_league_ids() -> list:
         SELECT
         DISTINCT league_id,
         FROM '{games_file_path}' G
+        ORDER BY league_id
         """
         )
         .fetchnumpy()["league_id"]
@@ -44,12 +45,32 @@ def get_all_seasons_nb(league_id: str) -> list:
         DISTINCT season_nb,
         FROM '{games_file_path}' G
         WHERE league_id = '{league_id}'
+        ORDER BY season_nb
         """
         )
         .fetchnumpy()["season_nb"]
         .tolist()
     )
     return seasons_nb
+
+
+def get_all_divisions_nb(league_id: str, season: int) -> list:
+
+    divisions_nb = (
+        duckdb.query(
+            f"""
+        SELECT
+        DISTINCT division,
+        FROM '{games_file_path}' G
+        WHERE league_id = '{league_id}'
+        AND season_nb = '{season}'
+        ORDER BY division
+        """
+        )
+        .fetchnumpy()["division"]
+        .tolist()
+    )
+    return divisions_nb
 
 
 def get_nb_players(league_id: str, season_nb: int, division: int) -> list:
