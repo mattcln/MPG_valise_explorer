@@ -1,3 +1,5 @@
+import time
+
 import streamlit as st
 from config.config_reader import get_config
 from scrap.league import League
@@ -34,6 +36,7 @@ matchweek_not_scrapped = get_matchweeks_not_scrapped(
 if matchweek_not_scrapped:
     st.write(f"I will scrap matchweeks {matchweek_not_scrapped}.")
     if st.button("Scrap games"):
+        start_time = time.time()
         init_logger()
         Driver = Driver(docker=False)
 
@@ -53,5 +56,6 @@ if matchweek_not_scrapped:
             matchweeks=matchweek_not_scrapped,
         )
         Driver.driver.quit()
+        st.write(f"Games scrapped in {time.time() - start_time} seconds.")
 else:
     st.write(f"All games are already scrapped.")

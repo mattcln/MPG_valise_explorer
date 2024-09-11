@@ -29,11 +29,10 @@ class Game(MPG):
         "miroir",
         "chapron",
         "tontonpat",
-        "decat",
         "5défenseurs",
         "4défenseurs",
         "capitaine",
-        "4decat",
+        "decat",
     ]
 
     export_game_path = "exports/games.parquet"
@@ -143,25 +142,30 @@ class Game(MPG):
         TODO: Find a better way to catch out mirror possible problem.
         => Dès que j'ai un bonus miroir je coupe le comtpe des bonus, mais je rate la récup
         sur les défenses à 4 et 5 à ce moment là du coup. + méthodo pas folle
+        => Solution trouvée : je change la liste des bonus que je "catch", je passe de la liste complète
+            à une liste réduite uniquement aux défenses 4 et 5.
         """
         if home:
             prefix = "h_"
         else:
             prefix = "v_"
 
+        current_bonus_list = self.all_bonus_list
+
         all_bonus = self.driver.find_elements(By.XPATH, f"//*[@class='{bonus_class}']")
         for bonus in all_bonus:
             bonus_name = bonus.find_element(By.TAG_NAME, "p").text.lower().replace(" ", "")
             bonus_name = bonus_name.replace("chapronrouge", "chapron")
             bonus_name = bonus_name.replace("lavaliseànanard", "valise")
-            bonus_name = bonus_name.replace("4-decat'", "4decat")
-            bonus_name = bonus_name.replace("mcdo+", "ubereats")  # Ancien nom
-            if bonus_name in self.all_bonus_list:
+            bonus_name = bonus_name.replace("4-decat'", "decat")
+            bonus_name = bonus_name.replace("mcdo+", "ubereats")  # Renaming
+            if bonus_name in current_bonus_list:
                 bonus_dict[f"{prefix}{bonus_name}"] += 1
                 if bonus_name == "miroir":
-                    return bonus_dict
+                    current_bonus_list = ["5défenseurs", "4défenseurs", "capitaine"]
             else:
-                raise ValueError(f"Found an unknown bonus name : {bonus_name}")
+                if bonus_name not in self.all_bonus_list:
+                    raise ValueError(f"Found an unknown bonus name : {bonus_name}")
         return bonus_dict
 
     def get_bonus_info(self):
@@ -236,6 +240,7 @@ class Game(MPG):
                 "h_decat": self.bonus["h_decat"],
                 "h_5défenseurs": self.bonus["h_5défenseurs"],
                 "h_4défenseurs": self.bonus["h_4défenseurs"],
+                "h_capitaine": self.bonus["h_capitaine"],
                 "v_valise": self.bonus["v_valise"],
                 "v_ubereats": self.bonus["v_ubereats"],
                 "v_suarez": self.bonus["v_suarez"],
@@ -246,6 +251,7 @@ class Game(MPG):
                 "v_decat": self.bonus["v_decat"],
                 "v_5défenseurs": self.bonus["v_5défenseurs"],
                 "v_4défenseurs": self.bonus["v_4défenseurs"],
+                "v_capitaine": self.bonus["v_capitaine"],
             }
         )
         try:

@@ -26,7 +26,7 @@ def get_total_team_bonus_played(team_id: str) -> dict:
             SUM({prefix}miroir) AS miroir,
             SUM({prefix}chapron) AS chapron,
             SUM({prefix}tontonpat) AS tontonpat,
-            SUM({prefix}decat) AS decat
+            SUM({prefix}4decat) AS decat
         FROM '{game_file_path}' G
         INNER JOIN '{bonus_file_path}' B ON G.match_id = B.match_id
         WHERE {prefix}teamid = '{team_id}'

@@ -18,7 +18,7 @@ config = get_config()
 
 league_ids = get_all_league_ids()
 
-selected_league_id = st.selectbox("De quelle ligue voulez-vous connaître les bonus restants ?", (league_ids))
+selected_league_id = st.selectbox("Quelle ligue ?", (league_ids))
 
 if selected_league_id:
     seasons = get_all_seasons_nb(league_id=selected_league_id)
