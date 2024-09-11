@@ -9,22 +9,26 @@ from utils.log import init_logger
 
 # st.set_page_config(layout="wide")
 
-st.title("Scrapping new games")
+st.title("Wish woush, scrappons de nouvelles games")
 
-selected_league_id = st.text_input(
-    "Quelle est l'ID de la ligue que vous souhaitez scrapper ?",
-    "XXXXXXXX",
-)
+
 selected_results_link = st.text_input(
     "Quelle est le lien des résultats de la ligue en question ?",
     "https://mpg.football/winner/mpg_league_XXXXXXXX/mpg_division_XXXXXXXX_X_X/results",
 )
+selected_league_id = selected_results_link.split("league_")[1].split("/")[0]
 
-selected_season_nb = st.number_input("Quelle saison ?", step=1)
+selected_season_nb = selected_results_link.split(f"{selected_league_id}_")[1].split("_")[0]
 
-selected_division = st.number_input("Quelle division ?", step=1)
+selected_division = selected_results_link.split(f"{selected_league_id}_")[1].split("_")[1].split("/")[0]
 
-selected_nb_players = st.slider("Combien de joueurs y a t-il par division ?", 4, 10, 6, step=2)
+selected_nb_players = st.slider(
+    f"Combien de joueurs dans la division {selected_division}, saison {selected_season_nb} de la ligue {selected_league_id} ?",
+    4,
+    10,
+    6,
+    step=2,
+)
 
 matchweek_not_scrapped = get_matchweeks_not_scrapped(
     league_id=selected_league_id,
@@ -50,7 +54,7 @@ if matchweek_not_scrapped:
             driver=Driver.driver,
             league_id=selected_league_id,
             results_link=selected_results_link,
-            season_nb=selected_nb_players,
+            season_nb=selected_season_nb,
             division=selected_division,
             nb_players=selected_nb_players,
             matchweeks=matchweek_not_scrapped,
