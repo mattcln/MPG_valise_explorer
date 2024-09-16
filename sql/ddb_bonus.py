@@ -26,7 +26,7 @@ def get_total_team_bonus_played(team_id: str) -> dict:
             SUM({prefix}miroir) AS miroir,
             SUM({prefix}chapron) AS chapron,
             SUM({prefix}tontonpat) AS tontonpat,
-            SUM({prefix}4decat) AS decat
+            SUM({prefix}decat) AS decat
         FROM '{game_file_path}' G
         INNER JOIN '{bonus_file_path}' B ON G.match_id = B.match_id
         WHERE {prefix}teamid = '{team_id}'
@@ -45,13 +45,39 @@ def get_all_team_ids(league_id, season_nb, division):
     :param season_nb: _description_
     """
     query = f"""
-    SELECT 
-        DISTINCT(h_teamid)
-    FROM '{game_file_path}' G
-    WHERE G.league_id = '{league_id}'
-    AND G.season_nb = '{season_nb}'
-    AND G.division = '{division}'
+    SELECT
+        DISTINCT(id)
+    FROM(
+        SELECT 
+            h_teamid AS id
+        FROM '{game_file_path}' G
+            WHERE G.league_id = '{league_id}'
+            AND G.season_nb = '{season_nb}'
+            AND G.division = '{division}'
+        UNION ALL
+        SELECT 
+            v_teamid AS id
+        FROM '{game_file_path}' G
+            WHERE G.league_id = '{league_id}'
+            AND G.season_nb = '{season_nb}'
+            AND G.division = '{division}')
     """
+    # query = f"""
+    # SELECT
+    #     h_teamid AS id
+    # FROM '{game_file_path}' G
+    #     WHERE G.league_id = '{league_id}'
+    #     AND G.season_nb = '{season_nb}'
+    #     AND G.division = '{division}'
+    # UNION ALL
+    # SELECT
+    #     v_teamid AS id
+    # FROM '{game_file_path}' G
+    #     WHERE G.league_id = '{league_id}'
+    #     AND G.season_nb = '{season_nb}'
+    #     AND G.division = '{division}'
+    # UNION ALL)
+    # """
     return duckdb.query(query).fetchnumpy()
 
 
@@ -99,7 +125,7 @@ def get_all_players_bonus(league_id: str, season_nb: int, nb_players: int, divis
     bonus = get_json_bonus()
     start_bonus = bonus[f"{nb_players}_players"]
 
-    team_ids = get_all_team_ids(league_id=league_id, season_nb=season_nb, division=division)["h_teamid"]
+    team_ids = get_all_team_ids(league_id=league_id, season_nb=season_nb, division=division)["id"]
 
     bonus_df = pl.DataFrame()
     for team_id in team_ids:
