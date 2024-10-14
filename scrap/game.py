@@ -3,6 +3,8 @@ import polars as pl
 from scrap.mpg import MPG
 
 pl.Config(tbl_cols=22)
+import sys
+
 from selenium.webdriver.common.by import By
 
 from utils.selenium_helper import get_url
@@ -37,6 +39,19 @@ class Game(MPG):
 
     export_game_path = "exports/games.parquet"
     export_bonus_path = "exports/bonus.parquet"
+
+    def is_game_over(self):
+        """
+        L'objectif est de confirmer que le match est bien terminé.
+        Si ce n'est pas le cas on stop le scrap et on ferme la page.
+        """
+        status_class = "sc-bcXHqe sc-fvEvSO kzHDVe jXPOYy"
+
+        status = self.driver.find_element(By.XPATH, f"//*[@class='{status_class}']").text
+        if status != "Terminé":
+            print(f"Game status is {status}, scrapping ends here.")
+            self.driver.quit()
+            sys.exit(f"Game status is {status}, scrapping ends here.")
 
     def get_players_info_df(self, scores_tab_element):
         """
@@ -291,6 +306,8 @@ class Game(MPG):
         self.matchweek = matchweek
 
         get_url(driver=self.driver, url=game_link)
+
+        self.is_game_over()
 
         self.tab_info = self.get_score_tab_info()
 
