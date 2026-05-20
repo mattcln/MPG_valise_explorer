@@ -1,0 +1,19 @@
+services:
+  mpg-explorer:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile
+    image: mpg-explorer:latest
+    volumes:
+      - ./data:/app/data
+    environment:
+      DATA_PATH: /app/data
+      MPG_USERNAME: ${MPG_USERNAME}
+      MPG_PASSWORD: ${MPG_PASSWORD}
+      LEAGUE_ID: ${LEAGUE_ID}
+      TEAM_NAME: ${TEAM_NAME}
+      SEASON_NUMBER: ${SEASON_NUMBER}
+      DIVISION: ${DIVISION}
+      NUMBER_PLAYERS: ${NUMBER_PLAYERS}
+      USE_DOCKER: ${USE_DOCKER}
+      PYTHONPATH: ${PYTHONPATH}
